@@ -1,15 +1,12 @@
+import PageLoader from "@/components/ui/page-loader";
+import { Metadata } from "next";
 import React from "react";
-
+export const metadata: Metadata = {
+  title: "Loading...",
+  description: "Chat app with text, audio and video calls",
+};
 const AnimatedLoader: React.FC = () => {
-  return (
-    <div className="flex justify-center items-center h-screen ">
-      <div className="relative w-24 h-24">
-        <div className="absolute inset-0 border-4 border-t-4 border-r-4 border-transparent border-t-discord border-r-discord rounded-full animate-spin"></div>
-        <div className="absolute inset-1 border-4 border-t-4 border-r-4  border-transparent border-t-white border-r-white rounded-full animate-spin-slow"></div>
-        <div className="absolute inset-2 border-4 border-t-4 border-r-4  border-transparent border-t-purple-500 border-r-purple-500  rounded-full animate-spin-reverse"></div>
-      </div>
-    </div>
-  );
+  return <PageLoader />;
 };
 
 export default AnimatedLoader;

@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config = {
+  mode: "jit",
   darkMode: ["class"],
   content: [
     "./pages/**/*.{ts,tsx}",
@@ -52,10 +53,10 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        discord: {
-          DEFAULT: "#5865F2",
-          hover: "#4752C4",
-          disabled: "#99AAB5",
+        chat_fusion: {
+          DEFAULT: "#007BFF",
+          hover: "#0056b3",
+          disabled: "#9fc2ff",
         },
       },
       borderRadius: {

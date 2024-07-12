@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import authorizedRoute from "@/components/auth-components/AuthorizedRoute";
 import UserAvatar from "@/components/common/UserAvatar";
 import {
   DropdownMenu,
@@ -15,20 +14,24 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { CgProfile } from "react-icons/cg";
 import { MdLogout } from "react-icons/md";
 import { Button } from "@/components/ui/button";
-import { SiDiscord } from "react-icons/si";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
+import { useAuth } from "@/components/providers/auth-provider";
+import { AuthActionTypes } from "@/lib/types/auth";
+import { useRouter } from "next/navigation";
+import { LOGIN } from "@/lib/routes";
+import Image from "next/image";
 
 function Home() {
+  const router = useRouter();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
+  const { dispatch } = useAuth();
   const handleDialogOpen = () => {
     setIsDialogOpen(true);
   };
@@ -39,10 +42,12 @@ function Home() {
   const handleLogout = async () => {
     await signOut(auth);
     localStorage.clear();
+    router.push(LOGIN);
     setIsDialogOpen(false);
+    dispatch({ type: AuthActionTypes.SIGN_OUT_USER });
   };
   return (
-    <div className="">
+    <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button
@@ -76,32 +81,45 @@ function Home() {
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent
-          className="flex flex-col items-center justify-center text-center space-y-4 p-6 w-80 max-w-full"
+          className="flex flex-col items-center justify-center text-center space-y-4 py-10 bg-card w-[90vw] max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl 2xl:max-w-[50vw]"
           hideClose
         >
-          <DialogTitle className="flex gap-3">
-            <SiDiscord /> Logout
+          <div className="h-28 w-28 overflow-hidden">
+            <Image
+              src="/assets/chat-fusion.png"
+              alt="Chat fusion logo"
+              width={140}
+              height={140}
+              className="object-cover scale-150"
+            />
+          </div>
+          <DialogTitle className="text-xl min-[400px]:text-2xl !m-0 md:text-3xl">
+            Are you sure you want to Logout?
           </DialogTitle>
-          <DialogDescription>
-            Are you sure you want to logout?
-          </DialogDescription>
-          <DialogFooter>
-            <div className=" flex justify-center items-center gap-5 w-full">
+
+          <DialogFooter className="w-full">
+            <div className="flex flex-col md:flex-row justify-center mx-auto items-center gap-5 w-full">
               <Button
                 onClick={handleDialogClose}
-                className="outline-none border border-none focus:outline-none "
+                size="lg"
+                className="outline-none border border-none w-[60%] md:w-auto focus:outline-none"
               >
                 Cancel
               </Button>
-              <Button onClick={handleLogout} variant={"destructive"}>
+              <Button
+                onClick={handleLogout}
+                variant="destructive"
+                size="lg"
+                className="outline-none border border-none w-[60%] md:w-auto focus:outline-none"
+              >
                 Logout
               </Button>
             </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }
 
-export default authorizedRoute(Home);
+export default Home;

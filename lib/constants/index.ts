@@ -54,3 +54,5 @@ export const signInFormSchema = z.object({
 
 export const TOKEN = "idToken";
 export const EXPIRY_TIME = "expiresIn";
+export const USER_INFO = "userInfo";
+export const SIGN_IN_SUCCESSFUL = "Signed in successfully";

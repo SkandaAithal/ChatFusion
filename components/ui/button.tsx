@@ -12,7 +12,7 @@ const buttonVariants = cva(
       variant: {
         default: "bg-primary text-primary-foreground hover:bg-primary/90",
         discord:
-          " bg-discord text-white py-2 px-4 rounded transition-colors duration-200 ease-in-out hover:bg-discord-hover disabled:bg-discord-disabled disabled:cursor-not-allowed",
+          " bg-chat_fusion text-white py-2 px-4 rounded transition-colors duration-200 ease-in-out hover:bg-chat_fusion-hover disabled:bg-chat_fusion-disabled disabled:cursor-not-allowed",
         destructive:
           "bg-[#ED4245] text-destructive-foreground hover:bg-[#ED4245]/90",
         outline:

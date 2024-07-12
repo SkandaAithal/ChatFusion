@@ -3,10 +3,10 @@ import React from "react";
 
 function AuthCardHeader({ title }: { title: string }) {
   return (
-    <div className="flex gap-3 justify-center items-center">
+    <div className="flex  justify-center items-center">
       <Image
-        src="/assets/discord-logo.gif"
-        alt="Discord logo"
+        src="/assets/chat-fusion.png"
+        alt="Chat fusion logo"
         width={70}
         height={70}
       />

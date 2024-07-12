@@ -1,11 +1,5 @@
 "use client";
 
-import { auth } from "@/lib/firebase/config";
-import {
-  useSignInWithEmailAndPassword,
-  useSignInWithGithub,
-  useSignInWithGoogle,
-} from "react-firebase-hooks/auth";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -18,27 +12,21 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
-import { useRouter } from "next/navigation";
-import { toast } from "react-toastify";
-import { AuthActionTypes, SignInFormData } from "@/lib/types/auth";
+import { SignInFormData } from "@/lib/types/auth";
 import { signInFormSchema } from "@/lib/constants";
 import SocialLogins from "@/components/auth-components/SocialLogins";
 import AuthCardHeader from "@/components/auth-components/AuthCardHeader";
-import { HOME, SIGN_UP } from "@/lib/routes";
+import { SIGN_UP } from "@/lib/routes";
 import Link from "next/link";
 import redirectIfLoggedIn from "@/components/auth-components/RedirectIfLoggedIn";
 import { useAuth } from "@/components/providers/auth-provider";
-import { setTokenAndExpiryTime } from "@/lib/utils/auth";
 
 function SignIn() {
-  const router = useRouter();
-  const [signInWithEmailAndPassword, , loading, error] =
-    useSignInWithEmailAndPassword(auth);
-  const [signInWithGoogle, , isGoogleLoading] = useSignInWithGoogle(auth);
-  const [signInWithGithub, , isGithubLoading] = useSignInWithGithub(auth);
-  const { dispatch, setIsLoggedin } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+  const { handleSignWithEmail, isEmailSignInLoading, isLoading } = useAuth();
+
   const form = useForm<SignInFormData>({
     resolver: zodResolver(signInFormSchema),
     defaultValues: {
@@ -46,69 +34,20 @@ function SignIn() {
       password: "",
     },
   });
-  const [showPassword, setShowPassword] = useState(false);
-
-  const isLoading = isGithubLoading || isGoogleLoading || loading;
-
-  useEffect(() => {
-    if (error?.code.includes("auth/invalid-credential")) {
-      toast.error("Invalid credentials. Please try again", {
-        position: "top-center",
-        hideProgressBar: true,
-        theme: "dark",
-      });
-    }
-  }, [error]);
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
   };
 
-  const onSubmit = async (values: SignInFormData) => {
-    try {
-      const userCredential = await signInWithEmailAndPassword(
-        values.email,
-        values.password
-      );
-
-      if (userCredential && userCredential.user) {
-        const payload = {
-          uid: userCredential.user.uid,
-          userName: userCredential.user.displayName,
-          email: userCredential.user.email,
-          userImage: userCredential.user.photoURL,
-        };
-        setTokenAndExpiryTime(userCredential.user);
-        setIsLoggedin(true);
-        dispatch({ type: AuthActionTypes.CREATE_USER, payload });
-        router.push(HOME);
-        toast.success("Signed in successfully", {
-          position: "top-center",
-          hideProgressBar: true,
-          theme: "dark",
-        });
-      }
-    } catch (err) {
-      toast.error("Error signing in! Please try again.", {
-        position: "top-center",
-        hideProgressBar: true,
-        theme: "dark",
-      });
-    }
-  };
-
   return (
-    <div className="grid gap-2 w-96 mx-5">
+    <div className="grid gap-2 w-[400px] mx-5">
       <AuthCardHeader title="Sign In to your account" />
-      <SocialLogins
-        isGithubLoading={isGithubLoading}
-        isGoogleLoading={isGoogleLoading}
-        isLoading={isLoading}
-        signInWithGithub={signInWithGithub}
-        signInWithGoogle={signInWithGoogle}
-      />
+      <SocialLogins />
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+        <form
+          onSubmit={form.handleSubmit(handleSignWithEmail)}
+          className="space-y-4"
+        >
           <FormField
             control={form.control}
             name="email"
@@ -155,7 +94,7 @@ function SignIn() {
             type="submit"
             className="w-full"
             variant={"discord"}
-            loading={loading}
+            loading={isEmailSignInLoading}
             disabled={isLoading}
           >
             Sign In

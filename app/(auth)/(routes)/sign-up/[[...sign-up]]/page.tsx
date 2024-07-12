@@ -1,17 +1,6 @@
 "use client";
 
-import {
-  auth,
-  sendEmailVerification,
-  updateProfile,
-} from "@/lib/firebase/config";
-import {
-  useCreateUserWithEmailAndPassword,
-  useSignInWithGithub,
-  useSignInWithGoogle,
-} from "react-firebase-hooks/auth";
 import { useForm } from "react-hook-form";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,10 +12,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
-import { useRouter } from "next/navigation";
-import { toast } from "react-toastify";
 import { SignUpFormData } from "@/lib/types/auth";
 import { signUpFormSchema } from "@/lib/constants";
 import SocialLogins from "@/components/auth-components/SocialLogins";
@@ -34,13 +21,12 @@ import AuthCardHeader from "@/components/auth-components/AuthCardHeader";
 import Link from "next/link";
 import { LOGIN } from "@/lib/routes";
 import redirectIfLoggedIn from "@/components/auth-components/RedirectIfLoggedIn";
+import { useAuth } from "@/components/providers/auth-provider";
 
 function Signup() {
-  const router = useRouter();
-  const [createUserWithEmailAndPassword, , loading, error] =
-    useCreateUserWithEmailAndPassword(auth);
-  const [signInWithGoogle, , isGoogleLoading] = useSignInWithGoogle(auth);
-  const [signInWithGithub, , isGithubLoading] = useSignInWithGithub(auth);
+  const [showPassword, setShowPassword] = useState(false);
+  const { isLoading, handleSignUp, isSignUpLoading } = useAuth();
+
   const form = useForm<SignUpFormData>({
     resolver: zodResolver(signUpFormSchema),
     defaultValues: {
@@ -50,75 +36,17 @@ function Signup() {
       password: "",
     },
   });
-  const [showPassword, setShowPassword] = useState(false);
-
-  const isLoading = isGithubLoading || isGoogleLoading || loading;
-
-  useEffect(() => {
-    if (error) {
-      if (error.code.includes("auth/email-already-in-use")) {
-        toast.error("This email already exists!", {
-          position: "top-center",
-          hideProgressBar: true,
-          theme: "dark",
-        });
-      } else {
-        toast.error("Could not create your account. Please try again", {
-          position: "top-center",
-          hideProgressBar: true,
-          theme: "dark",
-        });
-      }
-    }
-  }, [error]);
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
   };
 
-  const onSubmit = async (values: SignUpFormData) => {
-    try {
-      const userCredential = await createUserWithEmailAndPassword(
-        values.email,
-        values.password
-      );
-
-      if (userCredential && userCredential.user) {
-        router.push("/sign-in");
-        await updateProfile(userCredential.user, {
-          displayName: `${values.firstname} ${values.lastname}`,
-        });
-        toast.success("Your account is created successfully", {
-          position: "top-center",
-          hideProgressBar: true,
-          theme: "dark",
-        });
-
-        if (!auth.currentUser?.emailVerified) {
-          await sendEmailVerification(auth.currentUser as any);
-        }
-      }
-    } catch (err) {
-      toast.error("Error creating a user! Please try again.", {
-        position: "top-center",
-        hideProgressBar: true,
-        theme: "dark",
-      });
-    }
-  };
-
   return (
-    <div className="grid gap-2 w-96 mx-5">
-      <AuthCardHeader title="Create an account" />
-      <SocialLogins
-        isGithubLoading={isGithubLoading}
-        isGoogleLoading={isGoogleLoading}
-        isLoading={isLoading}
-        signInWithGithub={signInWithGithub}
-        signInWithGoogle={signInWithGoogle}
-      />
+    <div className="grid gap-2 w-[400px] mx-5">
+      <AuthCardHeader title="Create an Account" />
+      <SocialLogins />
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+        <form onSubmit={form.handleSubmit(handleSignUp)} className="space-y-3">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 w-full">
             <FormField
               control={form.control}
@@ -195,7 +123,7 @@ function Signup() {
             type="submit"
             className="w-full"
             variant={"discord"}
-            loading={loading}
+            loading={isSignUpLoading}
             disabled={isLoading}
           >
             Continue

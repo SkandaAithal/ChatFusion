@@ -1,5 +1,3 @@
-import { CustomParameters, UserCredential } from "firebase/auth";
-
 export interface SignUpFormData {
   firstname: string;
   lastname: string;
@@ -9,19 +7,6 @@ export interface SignUpFormData {
 export interface SignInFormData {
   email: string;
   password: string;
-}
-export interface SocialLoginsProps {
-  signInWithGoogle: (
-    scopes?: string[] | undefined,
-    customOAuthParameters?: CustomParameters | undefined
-  ) => Promise<UserCredential | undefined>;
-  signInWithGithub: (
-    scopes?: string[] | undefined,
-    customOAuthParameters?: CustomParameters | undefined
-  ) => Promise<UserCredential | undefined>;
-  isGoogleLoading: boolean;
-  isGithubLoading: boolean;
-  isLoading: boolean;
 }
 
 export enum AuthActionTypes {
@@ -40,7 +25,6 @@ export type AuthActions =
     }
   | {
       type: AuthActionTypes.SIGN_OUT_USER;
-      payload: null;
     };
 
 export type AuthDispatch = React.Dispatch<AuthActions>;
@@ -55,6 +39,15 @@ export interface AuthContextType {
   isLoggedin: boolean;
   state: AuthState;
   dispatch: AuthDispatch;
+  isGithubLoading: boolean;
+  isGoogleLoading: boolean;
+  isEmailSignInLoading: boolean;
+  isLoading: boolean;
+  isSignUpLoading: boolean;
+  handleSignWithEmail: (values: SignInFormData) => void;
+  handleSignUp: (values: SignUpFormData) => void;
+  handleGoogleSignIn: () => void;
+  handleGitHubSignIn: () => void;
 }
 export type AuthReducerType = (
   state: AuthState,

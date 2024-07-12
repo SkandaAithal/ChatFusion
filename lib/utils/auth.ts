@@ -9,18 +9,14 @@ export const getExpiryTimeFromToken = (token: string) => {
 };
 
 export const refreshToken = async () => {
-  try {
-    const user = auth.currentUser;
-    if (user) {
-      const idToken = await user.getIdToken(true);
-      const expiryTime = JSON.stringify(getExpiryTimeFromToken(idToken));
-      localStorage.setItem(TOKEN, idToken);
-      localStorage.setItem(EXPIRY_TIME, expiryTime);
-    } else {
-      throw new Error("No user logged in");
-    }
-  } catch (error) {
-    throw error;
+  const user = auth.currentUser;
+  if (user) {
+    const idToken = user.getIdToken(true);
+    const expiryTime = JSON.stringify(getExpiryTimeFromToken(await idToken));
+    localStorage.setItem(TOKEN, await idToken);
+    localStorage.setItem(EXPIRY_TIME, expiryTime);
+  } else {
+    throw new Error("No user logged in");
   }
 };
 

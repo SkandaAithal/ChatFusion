@@ -2,70 +2,22 @@ import React from "react";
 import { Button } from "../ui/button";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa6";
-import { AuthActionTypes, SocialLoginsProps } from "@/lib/types/auth";
-import { useRouter } from "next/navigation";
-import { setTokenAndExpiryTime } from "@/lib/utils/auth";
 import { useAuth } from "../providers/auth-provider";
-import { HOME } from "@/lib/routes";
-import { toast } from "react-toastify";
 
-const SocialLogins: React.FC<SocialLoginsProps> = ({
-  signInWithGoogle,
-  signInWithGithub,
-  isGoogleLoading,
-  isGithubLoading,
-  isLoading,
-}) => {
-  const router = useRouter();
-  const { setIsLoggedin, dispatch } = useAuth();
-
-  const handleGoogleSignIn = async () => {
-    const user = await signInWithGoogle();
-    if (user) {
-      const payload = {
-        uid: user.user.uid,
-        userName: user.user.displayName,
-        email: user.user.email,
-        userImage: user.user.photoURL,
-      };
-      setTokenAndExpiryTime(user.user);
-      setIsLoggedin(true);
-      dispatch({ type: AuthActionTypes.CREATE_USER, payload });
-      toast.success("Signed in successfully", {
-        position: "top-center",
-        hideProgressBar: true,
-        theme: "dark",
-      });
-      router.push(HOME);
-    }
-  };
-
-  const handleGitHubSignIn = async () => {
-    const user = await signInWithGithub();
-    if (user) {
-      const payload = {
-        uid: user.user.uid,
-        userName: user.user.displayName,
-        email: user.user.email,
-        userImage: user.user.photoURL,
-      };
-      setTokenAndExpiryTime(user.user);
-      setIsLoggedin(true);
-      dispatch({ type: AuthActionTypes.CREATE_USER, payload });
-      toast.success("Signed in successfully", {
-        position: "top-center",
-        hideProgressBar: true,
-        theme: "dark",
-      });
-      router.push(HOME);
-    }
-  };
+const SocialLogins: React.FC = () => {
+  const {
+    isLoading,
+    isGithubLoading,
+    isGoogleLoading,
+    handleGitHubSignIn,
+    handleGoogleSignIn,
+  } = useAuth();
 
   return (
     <div className="grid gap-4">
       <Button
         onClick={handleGoogleSignIn}
-        className=" gap-4 w-full"
+        className="gap-4 w-full"
         loading={isGoogleLoading}
         disabled={isLoading}
         loaderTheme="dark"
