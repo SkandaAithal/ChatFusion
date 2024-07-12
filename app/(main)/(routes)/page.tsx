@@ -84,13 +84,13 @@ function Home() {
           className="flex flex-col items-center justify-center text-center space-y-4 py-10 bg-card w-[90vw] max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl 2xl:max-w-[50vw]"
           hideClose
         >
-          <div className="h-28 w-28 overflow-hidden">
+          <div className="overflow-hidden">
             <Image
               src="/assets/chat-fusion.png"
               alt="Chat fusion logo"
-              width={140}
-              height={140}
-              className="object-cover scale-150"
+              width={100}
+              height={100}
+              className="object-cover"
             />
           </div>
           <DialogTitle className="text-xl min-[400px]:text-2xl !m-0 md:text-3xl">

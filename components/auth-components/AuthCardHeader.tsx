@@ -3,14 +3,14 @@ import React from "react";
 
 function AuthCardHeader({ title }: { title: string }) {
   return (
-    <div className="flex  justify-center items-center">
+    <div className="flex justify-center items-center gap-2 py-2">
       <Image
         src="/assets/chat-fusion.png"
         alt="Chat fusion logo"
-        width={70}
-        height={70}
+        width={50}
+        height={50}
       />
-      <h1 className="text-2xl font-bold  ">{title}</h1>
+      <h1 className="text-2xl font-bold">{title}</h1>
     </div>
   );
 }
