@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../providers/auth-provider";
-import { EXPIRY_TIME, TOKEN } from "@/lib/constants";
+import { EXPIRY_TIME, TOKEN, USER_INFO } from "@/lib/constants";
 import { HOME } from "@/lib/routes";
 import { useRouter } from "next/navigation";
 import PageLoader from "../ui/page-loader";
@@ -18,8 +18,13 @@ const redirectIfLoggedIn = <P extends object>(
       const accessToken = localStorage.getItem(TOKEN);
       const expiryTimeStr = localStorage.getItem(EXPIRY_TIME);
       const tokenExpireTime = expiryTimeStr ? JSON.parse(expiryTimeStr) : null;
-
-      if (isLoggedin || (!!accessToken && tokenExpireTime > Date.now())) {
+      const user =
+        typeof window !== "undefined" ? localStorage.getItem(USER_INFO) : null;
+      const userId = user ? JSON.parse(user).uid : null;
+      if (
+        isLoggedin ||
+        (!!accessToken && tokenExpireTime > Date.now() && userId)
+      ) {
         router.push(HOME);
       } else {
         setIsLoading(false);

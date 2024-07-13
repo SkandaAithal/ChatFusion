@@ -27,6 +27,7 @@ import { AuthActionTypes } from "@/lib/types/auth";
 import { useRouter } from "next/navigation";
 import { LOGIN } from "@/lib/routes";
 import Image from "next/image";
+import { ModeToggle } from "@/components/ui/mode-toggle";
 
 function Home() {
   const router = useRouter();
@@ -42,12 +43,14 @@ function Home() {
   const handleLogout = async () => {
     await signOut(auth);
     localStorage.clear();
-    router.push(LOGIN);
     setIsDialogOpen(false);
     dispatch({ type: AuthActionTypes.SIGN_OUT_USER });
+    router.push(LOGIN);
   };
+
   return (
     <>
+      <ModeToggle />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <button

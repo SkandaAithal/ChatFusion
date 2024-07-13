@@ -12,11 +12,11 @@ const buttonVariants = cva(
       variant: {
         default: "bg-primary text-primary-foreground hover:bg-primary/90",
         discord:
-          " bg-chat_fusion text-white py-2 px-4 rounded transition-colors duration-200 ease-in-out hover:bg-chat_fusion-hover disabled:bg-chat_fusion-disabled disabled:cursor-not-allowed",
+          "bg-chat_fusion text-white py-2 px-4 rounded transition-colors duration-200 ease-in-out hover:bg-chat_fusion-hover disabled:bg-chat_fusion-disabled disabled:cursor-not-allowed",
         destructive:
           "bg-[#ED4245] text-destructive-foreground hover:bg-[#ED4245]/90",
         outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+          "border border-input bg-popover hover:bg-accent hover:text-accent-foreground",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",

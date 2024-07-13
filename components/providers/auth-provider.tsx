@@ -4,6 +4,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 import {
@@ -39,7 +40,6 @@ import {
   updateProfile,
 } from "@/lib/firebase/config";
 import useToast from "@/lib/hooks/use-toast";
-import { ToastTypeValues } from "@/lib/types/common";
 
 const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider: React.FunctionComponent<
@@ -62,27 +62,36 @@ export const AuthProvider: React.FunctionComponent<
     USER_INFO
   );
 
-  const isLoading = isGithubLoading || isGoogleLoading || isEmailSignInLoading;
-  const errorMessages: { [key: string]: string } = {
-    "auth/invalid-credential": "Invalid credentials. Please try again",
-    "auth/email-already-in-use": "This email already exists!",
-    "auth/account-exists-with-different-credential":
-      "This account already exists with a different credential",
-    "default-signup-error": "Could not create your account. Please try again",
-  };
+  const isLoading = useMemo(
+    () => isGithubLoading || isGoogleLoading || isEmailSignInLoading,
+    [isGithubLoading, isGoogleLoading, isEmailSignInLoading]
+  );
+  const errorMessages: { [key: string]: string } = useMemo(
+    () => ({
+      "auth/invalid-credential": "Invalid credentials. Please try again",
+      "auth/email-already-in-use": "This email already exists!",
+      "auth/account-exists-with-different-credential":
+        "This account already exists with a different credential",
+      "default-signup-error": "Could not create your account. Please try again",
+    }),
+    []
+  );
 
-  const validateUser = async () => {
+  const validateUser = useCallback(async () => {
     try {
       const expiryTimeStr = localStorage.getItem(EXPIRY_TIME);
       const tokenExpireTime = expiryTimeStr ? JSON.parse(expiryTimeStr) : null;
-      if (!(tokenExpireTime > Date.now())) {
+      const user = localStorage.getItem(USER_INFO);
+      const userId = user ? JSON.parse(user).uid : null;
+      if (!(tokenExpireTime > Date.now()) && userId) {
         await refreshToken();
       }
     } catch (e) {
       setIsLoggedin(false);
       router.push(LOGIN);
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const storageEventListener = useCallback((event: any) => {
     if (event.key === TOKEN || event.key === EXPIRY_TIME) {
@@ -98,90 +107,76 @@ export const AuthProvider: React.FunctionComponent<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleSignWithEmail = async (values: SignInFormData) => {
-    try {
-      const userCredential = await signInWithEmailAndPassword(
-        values.email,
-        values.password
-      );
-
-      if (userCredential && userCredential.user) {
-        const payload = {
-          uid: userCredential.user.uid,
-          userName: userCredential.user.displayName,
-          email: userCredential.user.email,
-          userImage: userCredential.user.photoURL,
-        };
-        setTokenAndExpiryTime(userCredential.user);
-        setIsLoggedin(true);
-        dispatch({ type: AuthActionTypes.CREATE_USER, payload });
-        router.push(HOME);
-        showToast(SIGN_IN_SUCCESSFUL);
-      }
-    } catch (err) {
-      showToast("Error signing in! Please try again.", ToastTypeValues.ERROR);
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    const user = await signInWithGoogle();
-    if (user) {
-      const payload = {
-        uid: user.user.uid,
-        userName: user.user.displayName,
-        email: user.user.email,
-        userImage: user.user.photoURL,
-      };
-      setTokenAndExpiryTime(user.user);
-      setIsLoggedin(true);
-      dispatch({ type: AuthActionTypes.CREATE_USER, payload });
-      showToast(SIGN_IN_SUCCESSFUL);
-      router.push(HOME);
-    }
-  };
-
-  const handleGitHubSignIn = async () => {
-    const user = await signInWithGithub();
-    if (user) {
-      const payload = {
-        uid: user.user.uid,
-        userName: user.user.displayName,
-        email: user.user.email,
-        userImage: user.user.photoURL,
-      };
-      setTokenAndExpiryTime(user.user);
-      setIsLoggedin(true);
-      dispatch({ type: AuthActionTypes.CREATE_USER, payload });
-      showToast(SIGN_IN_SUCCESSFUL);
-      router.push(HOME);
-    }
-  };
-
-  const handleSignUp = async (values: SignUpFormData) => {
-    try {
-      const userCredential = await createUserWithEmailAndPassword(
-        values.email,
-        values.password
-      );
-
-      if (userCredential && userCredential.user) {
-        router.push(LOGIN);
-        await updateProfile(userCredential.user, {
-          displayName: `${values.firstname} ${values.lastname}`,
-        });
-        showToast("Your account is created successfully");
-
-        if (!auth.currentUser?.emailVerified) {
-          await sendEmailVerification(auth.currentUser as any);
+  const handleAuth = useCallback(
+    async (authMethod: () => Promise<any>, redirectUrl: string) => {
+      try {
+        const userCredential = await authMethod();
+        if (userCredential?.user) {
+          const payload = {
+            uid: userCredential.user.uid,
+            userName: userCredential.user.displayName,
+            email: userCredential.user.email,
+            userImage: userCredential.user.photoURL,
+          };
+          setTokenAndExpiryTime(userCredential.user);
+          setIsLoggedin(true);
+          dispatch({ type: AuthActionTypes.CREATE_USER, payload });
+          showToast(SIGN_IN_SUCCESSFUL);
+          router.push(redirectUrl);
         }
+      } catch (err) {
+        showErrorToast("Error signing in! Please try again.");
       }
-    } catch (err) {
-      showToast(
-        "Error creating a user! Please try again.",
-        ToastTypeValues.ERROR
-      );
-    }
-  };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  const handleSignWithEmail = useCallback((values: SignInFormData) => {
+    handleAuth(
+      () => signInWithEmailAndPassword(values.email, values.password),
+      HOME
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleGoogleSignIn = useCallback(
+    () => handleAuth(signInWithGoogle, HOME),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  const handleGitHubSignIn = useCallback(
+    () => handleAuth(signInWithGithub, HOME),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  const handleSignUp = useCallback(
+    async (values: SignUpFormData) => {
+      try {
+        const userCredential = await createUserWithEmailAndPassword(
+          values.email,
+          values.password
+        );
+        if (userCredential?.user) {
+          await updateProfile(userCredential.user, {
+            displayName: `${values.firstname} ${values.lastname}`,
+          });
+          router.push(LOGIN);
+          showToast("Your account is created successfully");
+
+          if (!auth.currentUser?.emailVerified && auth.currentUser) {
+            await sendEmailVerification(auth.currentUser);
+          }
+        }
+      } catch (err) {
+        showErrorToast("Error creating a user! Please try again.");
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   useEffect(() => {
     if (signInError?.code) {
@@ -214,7 +209,7 @@ export const AuthProvider: React.FunctionComponent<
     let interval: NodeJS.Timeout | undefined;
 
     if (isLoggedin) {
-      interval = setInterval(validateUser, 5000);
+      interval = setInterval(validateUser, 3000);
     }
 
     return () => {
@@ -224,6 +219,7 @@ export const AuthProvider: React.FunctionComponent<
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoggedin]);
+
   return (
     <AuthContext.Provider
       value={{

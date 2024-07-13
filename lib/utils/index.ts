@@ -6,6 +6,10 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function getInitials(fullName: string): string {
-  const [firstName, lastName] = fullName.trim().split(/\s+/);
-  return `${firstName?.charAt(0)}${lastName?.charAt(0)}`?.toUpperCase();
+  const nameParts = fullName.trim().split(/\s+/);
+  if (nameParts.length === 0 || nameParts[0] === "") return '';
+  return (
+    nameParts[0].charAt(0).toUpperCase() +
+      nameParts[1]?.charAt(0).toUpperCase() || ""
+  );
 }

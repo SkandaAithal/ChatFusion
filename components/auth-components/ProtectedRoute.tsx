@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../providers/auth-provider";
 import { usePathname, useRouter } from "next/navigation";
-import { EXPIRY_TIME, TOKEN } from "@/lib/constants";
+import { EXPIRY_TIME, TOKEN, USER_INFO } from "@/lib/constants";
 import { HOME, LOGIN, PROTECTED_ROUTES, SIGN_UP } from "@/lib/routes";
 import PageLoader from "../ui/page-loader";
 
@@ -19,11 +19,18 @@ export const ProtectedRoute: React.FunctionComponent<
       typeof window !== "undefined" ? localStorage.getItem(TOKEN) : null;
     const expiryTimeStr =
       typeof window !== "undefined" ? localStorage.getItem(EXPIRY_TIME) : null;
+    const user =
+      typeof window !== "undefined" ? localStorage.getItem(USER_INFO) : null;
+    const userId = user ? JSON.parse(user).uid : null;
     const tokenExpireTime = expiryTimeStr ? JSON.parse(expiryTimeStr) : null;
 
     const checkAuth = () => {
-      if (accessToken && tokenExpireTime && tokenExpireTime > Date.now()) {
-        setIsLoggedin(true);
+      if (
+        accessToken &&
+        tokenExpireTime &&
+        tokenExpireTime > Date.now() &&
+        userId
+      ) {
         if (PROTECTED_ROUTES.includes(currentPathname)) {
           setIsCheckingAuth(false);
         } else {
@@ -35,8 +42,6 @@ export const ProtectedRoute: React.FunctionComponent<
           router.push(LOGIN);
         } else if (currentPathname === LOGIN || currentPathname === SIGN_UP) {
           setIsCheckingAuth(false);
-        } else {
-          router.push(HOME);
         }
       }
     };

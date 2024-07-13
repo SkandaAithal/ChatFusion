@@ -30,10 +30,9 @@ export default function RootLayout({
           <ProtectedRoute>
             <ThemeProvider
               attribute="class"
-              defaultTheme="light"
+              defaultTheme="dark"
               enableSystem={false}
-              forcedTheme="light"
-              storageKey="discord-theme"
+              storageKey="chat-fusion-theme"
             >
               {children}
             </ThemeProvider>
