@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+export const API_URL = process.env.NEXT_PUBLIC_API_ROUTE;
 export const signUpFormSchema = z.object({
   firstname: z
     .string()
@@ -56,3 +57,13 @@ export const TOKEN = "idToken";
 export const EXPIRY_TIME = "expiresIn";
 export const USER_INFO = "userInfo";
 export const SIGN_IN_SUCCESSFUL = "Signed in successfully";
+
+export const createServerFormSchema = z.object({
+  serverName: z
+    .string()
+    .min(1, { message: "Server name is required" })
+    .transform((val) => val.trim()),
+  imageUrl: z.string().min(1, { message: "Server image is required" }),
+});
+
+export const FILE_UPLOAD_SERVER_IMAGE = "serverImage";

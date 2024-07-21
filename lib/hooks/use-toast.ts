@@ -1,14 +1,15 @@
 import { toast, ToastOptions, ToastPosition } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { ToastType, ToastTypeValues } from "../types/common";
+import { useTheme } from "next-themes";
+import { ToastType, ToastTypeValues } from "../types/hooks/use-toast";
 
 const useToast = () => {
+  const { theme } = useTheme();
   const showToast = (
     message: string,
     type: ToastType = ToastTypeValues.SUCCESS,
     position: ToastPosition = "top-center",
-    hideProgressBar: boolean = true,
-    theme: "light" | "dark" = "dark"
+    hideProgressBar: boolean = true
   ) => {
     const options: ToastOptions = {
       position,

@@ -1,8 +1,9 @@
+"use client";
 import React from "react";
 import { Button } from "../ui/button";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa6";
-import { useAuth } from "../providers/auth-provider";
+import { useAuth } from "../../lib/providers/auth-provider";
 
 const SocialLogins: React.FC = () => {
   const {

@@ -1,27 +1,99 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { useAuth } from "../providers/auth-provider";
+import { useAuth } from "../../lib/providers/auth-provider";
 import { getInitials } from "@/lib/utils";
 import { FaUserAlt } from "react-icons/fa";
+import { useRouter } from "next/navigation";
+import { signOut } from "firebase/auth";
+import { auth } from "@/lib/firebase/config";
+import { AuthActionTypes } from "@/lib/types/auth";
+import { LOGIN } from "@/lib/routes";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { MdLogout } from "react-icons/md";
+import PromptModal from "../modals/PromptModal";
+import TooltipComponent from "../ui/tooltip";
 function UserAvatar() {
-  const { state } = useAuth();
-  const userImage = state.userImage;
-  const userName = state.userName;
+  const router = useRouter();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { dispatch, user } = useAuth();
+  const showModal = () => {
+    setIsModalOpen(!isModalOpen);
+  };
+  const userImage = user.userImage;
+  const userName = user.userName;
   const initials = getInitials(userName);
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.push(LOGIN);
+    localStorage.clear();
+    setIsModalOpen(false);
+    dispatch({ type: AuthActionTypes.SIGN_OUT_USER });
+  };
+
   return (
-    <Avatar className="cursor-pointer mx-4 mt-4">
-      {userImage ? (
-        <AvatarImage
-          src={userImage}
-          className="hover:scale-125  duration-300"
-        />
-      ) : (
-        <AvatarFallback className="text-2xl hover:scale-110  duration-300">
-          {initials ? initials : <FaUserAlt />}
-        </AvatarFallback>
-      )}
-    </Avatar>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            className="outline-none border border-none rounded-full h-16 w-16 overflow-hidden"
+            aria-label="Customise options"
+          >
+            <TooltipComponent tooltipText={userName} placement="right">
+              <Avatar className="cursor-pointer w-full h-full">
+                {userImage ? (
+                  <AvatarImage
+                    src={userImage}
+                    className="hover:scale-125  duration-300"
+                  />
+                ) : (
+                  <AvatarFallback className="text-2xl hover:scale-110  duration-300">
+                    {initials ? initials : <FaUserAlt />}
+                  </AvatarFallback>
+                )}
+              </Avatar>
+            </TooltipComponent>
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-40">
+          <DropdownMenuLabel>My Account</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+
+          <DropdownMenuItem className="w-full">
+            Profile
+            <DropdownMenuShortcut>
+              <FaUserAlt size={16} />
+            </DropdownMenuShortcut>
+          </DropdownMenuItem>
+
+          <DropdownMenuSeparator />
+
+          <DropdownMenuItem className="w-full" onClick={showModal}>
+            Log out
+            <DropdownMenuShortcut>
+              <MdLogout size={20} />
+            </DropdownMenuShortcut>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <PromptModal
+        isModalOpen={isModalOpen}
+        showModal={showModal}
+        showLogo
+        modalTitle="Are you sure you want to Logout?"
+        handlePrimaryAction={handleLogout}
+        primaryBtnText="Logout"
+      />
+    </>
   );
 }
 

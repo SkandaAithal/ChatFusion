@@ -14,6 +14,7 @@ import {
   SignUpFormData,
 } from "@/lib/types/auth";
 import {
+  API_URL,
   EXPIRY_TIME,
   SIGN_IN_SUCCESSFUL,
   TOKEN,
@@ -21,8 +22,10 @@ import {
 } from "@/lib/constants";
 import { useRouter } from "next/navigation";
 import {
+  authErrorMessages,
   authReducer,
   initailAuthState,
+  isUserValid,
   refreshToken,
   setTokenAndExpiryTime,
 } from "@/lib/utils/auth";
@@ -40,7 +43,8 @@ import {
   updateProfile,
 } from "@/lib/firebase/config";
 import useToast from "@/lib/hooks/use-toast";
-
+import PageLoader from "@/components/ui/page-loader";
+import axios from "axios";
 const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider: React.FunctionComponent<
   React.PropsWithChildren<unknown>
@@ -49,6 +53,7 @@ export const AuthProvider: React.FunctionComponent<
   const { showToast, showErrorToast } = useToast();
 
   const [isLoggedin, setIsLoggedin] = useState(false);
+  const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [createUserWithEmailAndPassword, , isSignUpLoading, signUpError] =
     useCreateUserWithEmailAndPassword(auth);
   const [signInWithEmailAndPassword, , isEmailSignInLoading, signInError] =
@@ -66,32 +71,17 @@ export const AuthProvider: React.FunctionComponent<
     () => isGithubLoading || isGoogleLoading || isEmailSignInLoading,
     [isGithubLoading, isGoogleLoading, isEmailSignInLoading]
   );
-  const errorMessages: { [key: string]: string } = useMemo(
-    () => ({
-      "auth/invalid-credential": "Invalid credentials. Please try again",
-      "auth/email-already-in-use": "This email already exists!",
-      "auth/account-exists-with-different-credential":
-        "This account already exists with a different credential",
-      "default-signup-error": "Could not create your account. Please try again",
-    }),
-    []
-  );
 
-  const validateUser = useCallback(async () => {
+  const validateUser = async () => {
     try {
-      const expiryTimeStr = localStorage.getItem(EXPIRY_TIME);
-      const tokenExpireTime = expiryTimeStr ? JSON.parse(expiryTimeStr) : null;
-      const user = localStorage.getItem(USER_INFO);
-      const userId = user ? JSON.parse(user).uid : null;
-      if (!(tokenExpireTime > Date.now()) && userId) {
+      if (isUserValid(true)) {
         await refreshToken();
       }
     } catch (e) {
       setIsLoggedin(false);
       router.push(LOGIN);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  };
 
   const storageEventListener = useCallback((event: any) => {
     if (event.key === TOKEN || event.key === EXPIRY_TIME) {
@@ -108,21 +98,26 @@ export const AuthProvider: React.FunctionComponent<
   }, []);
 
   const handleAuth = useCallback(
-    async (authMethod: () => Promise<any>, redirectUrl: string) => {
+    async (authMethod: () => Promise<any>) => {
       try {
         const userCredential = await authMethod();
         if (userCredential?.user) {
+          setIsAuthLoading(true);
           const payload = {
             uid: userCredential.user.uid,
             userName: userCredential.user.displayName,
             email: userCredential.user.email,
             userImage: userCredential.user.photoURL,
           };
+
+          await axios.post(`${API_URL}/users`, JSON.stringify(payload));
+
           setTokenAndExpiryTime(userCredential.user);
           setIsLoggedin(true);
           dispatch({ type: AuthActionTypes.CREATE_USER, payload });
           showToast(SIGN_IN_SUCCESSFUL);
-          router.push(redirectUrl);
+          await router.push(HOME);
+          setIsAuthLoading(false);
         }
       } catch (err) {
         showErrorToast("Error signing in! Please try again.");
@@ -133,21 +128,18 @@ export const AuthProvider: React.FunctionComponent<
   );
 
   const handleSignWithEmail = useCallback((values: SignInFormData) => {
-    handleAuth(
-      () => signInWithEmailAndPassword(values.email, values.password),
-      HOME
-    );
+    handleAuth(() => signInWithEmailAndPassword(values.email, values.password));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleGoogleSignIn = useCallback(
-    () => handleAuth(signInWithGoogle, HOME),
+    () => handleAuth(signInWithGoogle),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
   const handleGitHubSignIn = useCallback(
-    () => handleAuth(signInWithGithub, HOME),
+    () => handleAuth(signInWithGithub),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
@@ -179,21 +171,17 @@ export const AuthProvider: React.FunctionComponent<
   );
 
   useEffect(() => {
-    if (signInError?.code) {
-      const message =
-        errorMessages[signInError.code] ||
-        "An unknown error occurred during sign-in";
-      showErrorToast(message);
-    } else if (signUpError?.code) {
-      const message =
-        errorMessages[signUpError.code] ||
-        errorMessages["default-signup-error"];
-      showErrorToast(message);
-    } else if (githubError?.code) {
-      const message =
-        errorMessages[githubError.code] ||
-        "An unknown error occurred during GitHub authentication";
-      showErrorToast(message);
+    const error = signInError || signUpError || githubError;
+
+    if (error?.code) {
+      const errorMessage =
+        authErrorMessages[error.code] ||
+        (signInError && "An unknown error occurred during sign-in") ||
+        (signUpError && authErrorMessages["default-signup-error"]) ||
+        (githubError &&
+          "An unknown error occurred during GitHub authentication");
+
+      showErrorToast(errorMessage as string);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signInError, signUpError, githubError]);
@@ -209,7 +197,7 @@ export const AuthProvider: React.FunctionComponent<
     let interval: NodeJS.Timeout | undefined;
 
     if (isLoggedin) {
-      interval = setInterval(validateUser, 3000);
+      interval = setInterval(validateUser, 1000);
     }
 
     return () => {
@@ -225,7 +213,6 @@ export const AuthProvider: React.FunctionComponent<
       value={{
         isLoggedin,
         setIsLoggedin,
-        state,
         dispatch,
         isGithubLoading,
         isGoogleLoading,
@@ -236,9 +223,10 @@ export const AuthProvider: React.FunctionComponent<
         handleGoogleSignIn,
         handleGitHubSignIn,
         handleSignUp,
+        user: state,
       }}
     >
-      {children}
+      {isAuthLoading ? <PageLoader /> : children}
     </AuthContext.Provider>
   );
 };

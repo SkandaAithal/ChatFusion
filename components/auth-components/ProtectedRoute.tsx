@@ -1,10 +1,10 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../providers/auth-provider";
+import { useAuth } from "../../lib/providers/auth-provider";
 import { usePathname, useRouter } from "next/navigation";
-import { EXPIRY_TIME, TOKEN, USER_INFO } from "@/lib/constants";
 import { HOME, LOGIN, PROTECTED_ROUTES, SIGN_UP } from "@/lib/routes";
 import PageLoader from "../ui/page-loader";
+import { isUserValid } from "@/lib/utils/auth";
 
 export const ProtectedRoute: React.FunctionComponent<
   React.PropsWithChildren<unknown>
@@ -15,26 +15,15 @@ export const ProtectedRoute: React.FunctionComponent<
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   useEffect(() => {
-    const accessToken =
-      typeof window !== "undefined" ? localStorage.getItem(TOKEN) : null;
-    const expiryTimeStr =
-      typeof window !== "undefined" ? localStorage.getItem(EXPIRY_TIME) : null;
-    const user =
-      typeof window !== "undefined" ? localStorage.getItem(USER_INFO) : null;
-    const userId = user ? JSON.parse(user).uid : null;
-    const tokenExpireTime = expiryTimeStr ? JSON.parse(expiryTimeStr) : null;
-
     const checkAuth = () => {
-      if (
-        accessToken &&
-        tokenExpireTime &&
-        tokenExpireTime > Date.now() &&
-        userId
-      ) {
+      if (isUserValid()) {
+        setIsLoggedin(true);
         if (PROTECTED_ROUTES.includes(currentPathname)) {
           setIsCheckingAuth(false);
-        } else {
+        } else if (currentPathname === LOGIN || currentPathname === SIGN_UP) {
           router.push(HOME);
+        } else {
+          setIsCheckingAuth(false);
         }
       } else {
         setIsLoggedin(false);

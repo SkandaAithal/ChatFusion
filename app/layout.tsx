@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import { AR_One_Sans } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/providers/theme-provider";
+import { ThemeProvider } from "@/lib/providers/theme-provider";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { AuthProvider } from "@/components/providers/auth-provider";
+import { AuthProvider } from "@/lib/providers/auth-provider";
 import ProtectedRoute from "@/components/auth-components/ProtectedRoute";
+import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
+import { extractRouterConfig } from "uploadthing/server";
+import { ourFileRouter } from "./api/uploadthing/core";
 
 const oprnSans = AR_One_Sans({
   subsets: ["latin"],
@@ -13,8 +16,11 @@ const oprnSans = AR_One_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Chat Fusion",
-  description: "Chat app with text, audio and video calls",
+  title: { template: "%s", default: "Chat Fusion" },
+  description: "Connect via text, audio and video calls",
+  twitter: {
+    card: "summary_large_image",
+  },
 };
 
 export default function RootLayout({
@@ -25,19 +31,18 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={oprnSans.className}>
-        <ToastContainer />
-        <AuthProvider>
-          <ProtectedRoute>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="dark"
-              enableSystem={false}
-              storageKey="chat-fusion-theme"
-            >
-              {children}
-            </ThemeProvider>
-          </ProtectedRoute>
-        </AuthProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem={false}
+          storageKey="chat-fusion-theme"
+        >
+          <AuthProvider>
+            <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
+            <ToastContainer />
+            <ProtectedRoute>{children}</ProtectedRoute>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

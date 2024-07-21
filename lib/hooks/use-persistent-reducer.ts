@@ -13,7 +13,7 @@ import { isBrowser } from "../utils/auth";
 import {
   ReducerDefaultState,
   ReducerDefaultStateFunction,
-} from "../types/persistent-reducer";
+} from "../types/hooks/persistent-reducer";
 
 const usePersistentReducer = <R extends Reducer<any, any>>(
   reducer: R,

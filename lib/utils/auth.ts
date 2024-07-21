@@ -1,11 +1,40 @@
 import { auth } from "../firebase/config";
-import { EXPIRY_TIME, TOKEN } from "../constants";
+import { EXPIRY_TIME, TOKEN, USER_INFO } from "../constants";
 import { AuthActionTypes, AuthReducerType, AuthState } from "../types/auth";
 
 export const getExpiryTimeFromToken = (token: string) => {
   const [, payload] = token.split(".");
   const { exp } = JSON.parse(atob(payload));
   return exp * 1000;
+};
+
+export const isUserValid = (isTokenExpireCheck = false) => {
+  const accessToken = localStorage.getItem(TOKEN);
+  const expiryTimeStr = localStorage.getItem(EXPIRY_TIME);
+  const user = localStorage.getItem(USER_INFO);
+  const userId = user ? JSON.parse(user).uid : null;
+  const tokenExpireTime = expiryTimeStr ? JSON.parse(expiryTimeStr) : null;
+  if (isTokenExpireCheck) {
+    if (
+      accessToken &&
+      tokenExpireTime &&
+      !(tokenExpireTime > Date.now()) &&
+      userId
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  if (
+    accessToken &&
+    tokenExpireTime &&
+    tokenExpireTime > Date.now() &&
+    userId
+  ) {
+    return true;
+  }
+  return false;
 };
 
 export const refreshToken = async () => {
@@ -57,4 +86,12 @@ export const authReducer: AuthReducerType = (
         ...initailAuthState,
       };
   }
+};
+
+export const authErrorMessages: { [key: string]: string } = {
+  "auth/invalid-credential": "Invalid credentials. Please try again",
+  "auth/email-already-in-use": "This email already exists!",
+  "auth/account-exists-with-different-credential":
+    "This account already exists with a different credential",
+  "default-signup-error": "Could not create your account. Please try again",
 };

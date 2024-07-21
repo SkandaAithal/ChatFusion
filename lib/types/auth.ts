@@ -37,7 +37,7 @@ export interface AuthState {
 export interface AuthContextType {
   setIsLoggedin: React.Dispatch<boolean>;
   isLoggedin: boolean;
-  state: AuthState;
+  user: AuthState;
   dispatch: AuthDispatch;
   isGithubLoading: boolean;
   isGoogleLoading: boolean;
