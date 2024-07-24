@@ -1,7 +1,12 @@
+"use client";
+
+import { useAuth } from "@/lib/providers/auth-provider";
 import Image from "next/image";
 import React from "react";
+import { twMerge } from "tailwind-merge";
 
 function AuthCardHeader({ title }: { title: string }) {
+  const { isAuthLoading } = useAuth();
   return (
     <div className="flex justify-center items-center gap-2 py-2">
       <Image
@@ -9,6 +14,7 @@ function AuthCardHeader({ title }: { title: string }) {
         alt="Chat fusion logo"
         width={50}
         height={50}
+        className={twMerge(isAuthLoading ? "spin" : "")}
       />
       <h1 className="text-2xl font-bold">{title}</h1>
     </div>

@@ -15,6 +15,7 @@ const PromptModal: React.FC<PromptModalProps> = ({
   showModal,
   modalTitle,
   handlePrimaryAction,
+  handleCloseModalAction,
   showLogo = false,
   primaryBtnText,
   closeBtnText = "Cancel",
@@ -26,6 +27,13 @@ const PromptModal: React.FC<PromptModalProps> = ({
     if (handlePrimaryAction) {
       handlePrimaryAction();
     }
+  };
+
+  const handleCloseModalBtnClick = () => {
+    if (handleCloseModalAction) {
+      handleCloseModalAction();
+    }
+    showModal();
   };
 
   return (
@@ -59,7 +67,7 @@ const PromptModal: React.FC<PromptModalProps> = ({
         <DialogFooter className="w-full">
           <div className="flex flex-col md:flex-row justify-center mx-auto items-center gap-5 w-full">
             <Button
-              onClick={showModal}
+              onClick={handleCloseModalBtnClick}
               size="lg"
               className="outline-none border border-none w-[60%] md:w-auto focus:outline-none"
             >

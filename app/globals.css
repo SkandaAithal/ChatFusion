@@ -138,3 +138,7 @@ body,
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
+
+.spin {
+  animation: spin 1s linear infinite;
+}

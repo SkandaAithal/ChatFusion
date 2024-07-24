@@ -1,3 +1,4 @@
+"use client";
 import { toast, ToastOptions, ToastPosition } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useTheme } from "next-themes";

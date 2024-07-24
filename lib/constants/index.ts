@@ -57,6 +57,7 @@ export const TOKEN = "idToken";
 export const EXPIRY_TIME = "expiresIn";
 export const USER_INFO = "userInfo";
 export const SIGN_IN_SUCCESSFUL = "Signed in successfully";
+export const APP_THEME = "chat-fusion-theme";
 
 export const createServerFormSchema = z.object({
   serverName: z

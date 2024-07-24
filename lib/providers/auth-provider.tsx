@@ -43,7 +43,6 @@ import {
   updateProfile,
 } from "@/lib/firebase/config";
 import useToast from "@/lib/hooks/use-toast";
-import PageLoader from "@/components/ui/page-loader";
 import axios from "axios";
 const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider: React.FunctionComponent<
@@ -68,8 +67,12 @@ export const AuthProvider: React.FunctionComponent<
   );
 
   const isLoading = useMemo(
-    () => isGithubLoading || isGoogleLoading || isEmailSignInLoading,
-    [isGithubLoading, isGoogleLoading, isEmailSignInLoading]
+    () =>
+      isGithubLoading ||
+      isGoogleLoading ||
+      isEmailSignInLoading ||
+      isAuthLoading,
+    [isGithubLoading, isGoogleLoading, isEmailSignInLoading, isAuthLoading]
   );
 
   const validateUser = async () => {
@@ -111,13 +114,11 @@ export const AuthProvider: React.FunctionComponent<
           };
 
           await axios.post(`${API_URL}/users`, JSON.stringify(payload));
-
           setTokenAndExpiryTime(userCredential.user);
           setIsLoggedin(true);
           dispatch({ type: AuthActionTypes.CREATE_USER, payload });
           showToast(SIGN_IN_SUCCESSFUL);
-          await router.push(HOME);
-          setIsAuthLoading(false);
+          router.push(HOME);
         }
       } catch (err) {
         showErrorToast("Error signing in! Please try again.");
@@ -224,9 +225,11 @@ export const AuthProvider: React.FunctionComponent<
         handleGitHubSignIn,
         handleSignUp,
         user: state,
+        setIsAuthLoading,
+        isAuthLoading
       }}
     >
-      {isAuthLoading ? <PageLoader /> : children}
+      {children}
     </AuthContext.Provider>
   );
 };

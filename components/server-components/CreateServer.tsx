@@ -64,16 +64,9 @@ function CreateServer() {
     PostApiCall(`${API_URL}/servers`, { ...data, userId: user.uid });
   };
 
-  useEffect(() => {
-    if (error) {
-      showErrorToast((error as AxiosError).response?.data as string);
-    } else if (data) {
-      form.reset();
-      showModal();
-      showToast((data as AxiosResponse).data.message);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error, data]);
+  const handleCancelBtnClick = () => {
+    form.reset();
+  };
 
   const handleImageUploadError = (err: UploadThingError<Json>) => {
     if (err.message.includes("FileSizeMismatch")) {
@@ -88,6 +81,17 @@ function CreateServer() {
   const getCustomFileUploadErrors = (message: string) => {
     setUploadError(message);
   };
+
+  useEffect(() => {
+    if (error) {
+      showErrorToast((error as AxiosError).response?.data as string);
+    } else if (data) {
+      form.reset();
+      showModal();
+      showToast((data as AxiosResponse).data.message);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error, data]);
 
   const renderAddImageIcon = (imgUrl: string) =>
     imgUrl ? (
@@ -146,7 +150,7 @@ function CreateServer() {
                   className={twMerge(
                     uploadError || form.formState.errors.imageUrl?.message
                       ? "text-red-500"
-                      : "text-primary"
+                      : "dark:text-primary text-muted-foreground"
                   )}
                 >
                   {uploadError ? uploadError : "Server image"}
@@ -190,6 +194,7 @@ function CreateServer() {
         primaryBtnText="Create"
         customModalElement={renderCreateServerModalElement()}
         isPrimaryBtnLoading={isLoading}
+        handleCloseModalAction={handleCancelBtnClick}
       />
     </>
   );

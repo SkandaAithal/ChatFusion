@@ -21,10 +21,13 @@ import {
 import { MdLogout } from "react-icons/md";
 import PromptModal from "../modals/PromptModal";
 import TooltipComponent from "../ui/tooltip";
+import { useTheme } from "next-themes";
+import { APP_THEME } from "@/lib/constants";
 function UserAvatar() {
   const router = useRouter();
+  const { theme } = useTheme();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { dispatch, user } = useAuth();
+  const { dispatch, user, setIsAuthLoading } = useAuth();
   const showModal = () => {
     setIsModalOpen(!isModalOpen);
   };
@@ -33,9 +36,11 @@ function UserAvatar() {
   const initials = getInitials(userName);
 
   const handleLogout = async () => {
+    setIsAuthLoading(false);
     await signOut(auth);
     router.push(LOGIN);
     localStorage.clear();
+    localStorage.setItem(APP_THEME, theme as string);
     setIsModalOpen(false);
     dispatch({ type: AuthActionTypes.SIGN_OUT_USER });
   };

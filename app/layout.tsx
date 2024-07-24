@@ -9,6 +9,7 @@ import ProtectedRoute from "@/components/auth-components/ProtectedRoute";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { extractRouterConfig } from "uploadthing/server";
 import { ourFileRouter } from "./api/uploadthing/core";
+import { APP_THEME } from "@/lib/constants";
 
 const oprnSans = AR_One_Sans({
   subsets: ["latin"],
@@ -35,7 +36,7 @@ export default function RootLayout({
           attribute="class"
           defaultTheme="dark"
           enableSystem={false}
-          storageKey="chat-fusion-theme"
+          storageKey={APP_THEME}
         >
           <AuthProvider>
             <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />

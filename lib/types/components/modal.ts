@@ -3,6 +3,7 @@ export interface PromptModalProps {
   showModal: () => void;
   modalTitle: string;
   handlePrimaryAction?: () => void;
+  handleCloseModalAction?: () => void;
   showLogo?: boolean;
   primaryBtnText?: string;
   closeBtnText?: string;
