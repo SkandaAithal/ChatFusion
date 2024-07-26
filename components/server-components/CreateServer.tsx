@@ -27,14 +27,15 @@ import FileUplaod from "../common/FileUpload";
 import { twMerge } from "tailwind-merge";
 import { Input } from "../ui/input";
 import { useAuth } from "@/lib/providers/auth-provider";
-import { AxiosError, AxiosResponse } from "axios";
 import useToast from "@/lib/hooks/use-toast";
-import useAsync from "@/lib/hooks/use-async";
+import { ServerCreationResponse } from "@/lib/types/queries/create-server";
+import usePostMutation from "@/lib/hooks/use-post-mutation";
 
 function CreateServer() {
   const { user } = useAuth();
   const { showErrorToast, showToast } = useToast();
-  const { PostApiCall, data, error, isLoading } = useAsync();
+  const { performPostRequest, data, error, isLoading } =
+    usePostMutation<ServerCreationResponse>();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -61,7 +62,7 @@ function CreateServer() {
   };
 
   const handleCreateServer = async (data: CreateServerFormData) => {
-    PostApiCall(`${API_URL}/servers`, { ...data, userId: user.uid });
+    performPostRequest(`${API_URL}/servers`, { ...data, userId: user.uid });
   };
 
   const handleCancelBtnClick = () => {
@@ -84,11 +85,11 @@ function CreateServer() {
 
   useEffect(() => {
     if (error) {
-      showErrorToast((error as AxiosError).response?.data as string);
+      showErrorToast(error.message);
     } else if (data) {
       form.reset();
       showModal();
-      showToast((data as AxiosResponse).data.message);
+      showToast(data.message);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error, data]);

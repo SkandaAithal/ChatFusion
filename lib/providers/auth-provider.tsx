@@ -43,14 +43,14 @@ import {
   updateProfile,
 } from "@/lib/firebase/config";
 import useToast from "@/lib/hooks/use-toast";
-import axios from "axios";
+import usePostMutation from "../hooks/use-post-mutation";
 const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider: React.FunctionComponent<
   React.PropsWithChildren<unknown>
 > = ({ children }) => {
   const router = useRouter();
   const { showToast, showErrorToast } = useToast();
-
+  const { performPostRequest } = usePostMutation();
   const [isLoggedin, setIsLoggedin] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [createUserWithEmailAndPassword, , isSignUpLoading, signUpError] =
@@ -113,7 +113,7 @@ export const AuthProvider: React.FunctionComponent<
             userImage: userCredential.user.photoURL,
           };
 
-          await axios.post(`${API_URL}/users`, JSON.stringify(payload));
+          performPostRequest(`${API_URL}/users`, payload);
           setTokenAndExpiryTime(userCredential.user);
           setIsLoggedin(true);
           dispatch({ type: AuthActionTypes.CREATE_USER, payload });
@@ -226,7 +226,7 @@ export const AuthProvider: React.FunctionComponent<
         handleSignUp,
         user: state,
         setIsAuthLoading,
-        isAuthLoading
+        isAuthLoading,
       }}
     >
       {children}

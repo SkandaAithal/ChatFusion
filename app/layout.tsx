@@ -10,6 +10,7 @@ import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { extractRouterConfig } from "uploadthing/server";
 import { ourFileRouter } from "./api/uploadthing/core";
 import { APP_THEME } from "@/lib/constants";
+import TanStackProvider from "@/lib/providers/tanstack-provider";
 
 const oprnSans = AR_One_Sans({
   subsets: ["latin"],
@@ -32,18 +33,22 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={oprnSans.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem={false}
-          storageKey={APP_THEME}
-        >
-          <AuthProvider>
-            <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
-            <ToastContainer />
-            <ProtectedRoute>{children}</ProtectedRoute>
-          </AuthProvider>
-        </ThemeProvider>
+        <TanStackProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem={false}
+            storageKey={APP_THEME}
+          >
+            <AuthProvider>
+              <NextSSRPlugin
+                routerConfig={extractRouterConfig(ourFileRouter)}
+              />
+              <ToastContainer />
+              <ProtectedRoute>{children}</ProtectedRoute>
+            </AuthProvider>
+          </ThemeProvider>
+        </TanStackProvider>
       </body>
     </html>
   );
