@@ -111,7 +111,7 @@ function SignUpForm() {
         <Button
           type="submit"
           className="w-full"
-          variant={"discord"}
+          variant="chatfusion"
           loading={isSignUpLoading}
           disabled={isLoading}
         >

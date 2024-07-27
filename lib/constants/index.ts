@@ -68,3 +68,11 @@ export const createServerFormSchema = z.object({
 });
 
 export const FILE_UPLOAD_SERVER_IMAGE = "serverImage";
+
+export const LANDING_PAGE_IMAGES = [
+  "/assets/landing-page-1.jpg",
+  "/assets/landing-page-2.jpg",
+  "/assets/landing-page-3.jpg",
+  "/assets/landing-page-4.jpg",
+  "/assets/landing-page-5.jpg",
+];

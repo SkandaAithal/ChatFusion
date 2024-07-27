@@ -53,10 +53,10 @@ body,
     --primary: 60 9.1% 97.8%;
     --primary-foreground: 24 9.8% 10%;
 
-    --secondary: 12 6.5% 15.1%;
-    --secondary-foreground: 60 9.1% 97.8%;
+    --secondary: 0 0% 7%;
+    --secondary-foreground: 60 9.1% 95.8%;
 
-    --muted: 12 6.5% 15.1%;
+    --muted: 0 0% 15.1%;
     --muted-foreground: 24 5.4% 63.9%;
 
     --accent: 12 6.5% 15.1%;
@@ -141,4 +141,128 @@ body,
 
 .spin {
   animation: spin 1s linear infinite;
+}
+
+.typewriter h1 {
+  overflow: hidden;
+  border-right: 0.15em solid orange;
+  white-space: nowrap;
+  margin: 0 auto;
+  letter-spacing: 0.1em;
+  animation:
+    typing 2s steps(30, end),
+    blink-caret 0.75s step-end infinite;
+}
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes blink-caret {
+  from,
+  to {
+    border-color: transparent;
+  }
+  50% {
+    border-color: orange;
+  }
+}
+
+.scroller {
+  max-width: fit-content;
+  position: relative;
+  overflow: hidden;
+}
+
+.scroller__inner {
+  padding-block: 1rem;
+  display: flex;
+  flex-direction: var(--flex-direction, column);
+  gap: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.scroller[data-animated="true"] .scroller__inner {
+  animation: scroll var(--_animation-duration, 60s)
+    var(--_animation-direction, forwards) linear infinite;
+}
+
+.scroller[data-animated="true"][data-flex-direction="row"] {
+  -webkit-mask: linear-gradient(
+    90deg,
+    transparent 0%,
+    white 10%,
+    white 90%,
+    transparent 100%
+  );
+  mask: linear-gradient(
+    90deg,
+    transparent 0%,
+    white 10%,
+    white 90%,
+    transparent 100%
+  );
+}
+
+.scroller[data-animated="true"][data-flex-direction="column"] {
+  -webkit-mask: linear-gradient(
+    180deg,
+    transparent 0%,
+    white 10%,
+    white 90%,
+    transparent 100%
+  );
+  mask: linear-gradient(
+    180deg,
+    transparent 0%,
+    white 10%,
+    white 90%,
+    transparent 100%
+  );
+}
+
+.scroller[data-direction="right"] {
+  --_animation-direction: reverse;
+}
+
+.scroller[data-direction="left"] {
+  --_animation-direction: forwards;
+}
+
+.scroller[data-speed="fast"] {
+  --_animation-duration: 40s;
+}
+
+.scroller[data-speed="slow"] {
+  --_animation-duration: 80s;
+}
+
+.scroller[data-flex-direction="row"] {
+  --flex-direction: row;
+}
+
+.scroller[data-flex-direction="column"] {
+  --flex-direction: column;
+}
+
+@keyframes scroll {
+  to {
+    transform: var(--translate-end);
+  }
+}
+
+.scroller[data-flex-direction="row"] .scroller__inner {
+  --translate-end: translateX(calc(-50% - 0.5rem));
+  width: max-content;
+}
+
+.scroller[data-flex-direction="column"] .scroller__inner {
+  --translate-end: translateY(calc(-50% + 0.5rem));
+  height: max-content;
 }

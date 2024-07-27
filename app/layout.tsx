@@ -11,6 +11,7 @@ import { extractRouterConfig } from "uploadthing/server";
 import { ourFileRouter } from "./api/uploadthing/core";
 import { APP_THEME } from "@/lib/constants";
 import TanStackProvider from "@/lib/providers/tanstack-provider";
+import { AppProvider } from "@/lib/providers/app-provider";
 
 const oprnSans = AR_One_Sans({
   subsets: ["latin"],
@@ -41,11 +42,13 @@ export default function RootLayout({
             storageKey={APP_THEME}
           >
             <AuthProvider>
-              <NextSSRPlugin
-                routerConfig={extractRouterConfig(ourFileRouter)}
-              />
-              <ToastContainer />
-              <ProtectedRoute>{children}</ProtectedRoute>
+              <AppProvider>
+                <NextSSRPlugin
+                  routerConfig={extractRouterConfig(ourFileRouter)}
+                />
+                <ToastContainer />
+                <ProtectedRoute>{children}</ProtectedRoute>
+              </AppProvider>
             </AuthProvider>
           </ThemeProvider>
         </TanStackProvider>

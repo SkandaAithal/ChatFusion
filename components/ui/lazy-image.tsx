@@ -1,3 +1,4 @@
+"use client";
 import { LazyImageProps } from "@/lib/types/components/ui/lazyimage";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";

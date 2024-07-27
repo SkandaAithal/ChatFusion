@@ -8,7 +8,10 @@ export async function POST(request: NextRequest) {
     const { serverName, imageUrl, userId } = await request.json();
 
     if (!userId) {
-      return new NextResponse("UnAuthorized user", { status: 401 });
+      return NextResponse.json(
+        { message: "UnAuthorized user" },
+        { status: 401 }
+      );
     }
 
     const server = await db.server.create({
@@ -31,8 +34,11 @@ export async function POST(request: NextRequest) {
       server,
     });
   } catch (err) {
-    return new NextResponse(
-      "Something went wrong while creating the server. Please try again later.",
+    return NextResponse.json(
+      {
+        message:
+          "Something went wrong while creating the server. Please try again later.",
+      },
       { status: 500 }
     );
   }

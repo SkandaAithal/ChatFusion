@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
 
@@ -10,7 +10,7 @@ interface ApiPostParams {
 const usePostMutation = <T>(queryKeyToRefetch?: string[]) => {
   const queryClient = useQueryClient();
 
-  const mutation = useMutation<T, Error, ApiPostParams>({
+  const mutation = useMutation<T, AxiosError, ApiPostParams>({
     mutationFn: ({ endpoint, body }: ApiPostParams) =>
       axios.post(endpoint, body).then((response) => response.data),
     onSuccess: () => {
@@ -36,7 +36,7 @@ const usePostMutation = <T>(queryKeyToRefetch?: string[]) => {
       isError: mutation.status === "error",
       isSuccess: mutation.status === "success",
       data: mutation.data,
-      error: mutation.error,
+      error: (mutation.error?.response?.data as Error) ?? mutation.error,
       performPostRequest,
     }),
     [performPostRequest, mutation.status, mutation.data, mutation.error]

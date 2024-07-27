@@ -85,7 +85,7 @@ function SignInForm() {
         <Button
           type="submit"
           className="w-full"
-          variant={"discord"}
+          variant="chatfusion"
           loading={isEmailSignInLoading}
           disabled={isLoading}
         >

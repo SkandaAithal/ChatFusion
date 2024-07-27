@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import TooltipComponent from "../ui/tooltip";
 import ServerBadge from "./ServerBadge";
 import PromptModal from "../modals/PromptModal";
 import { CircularProgress } from "../common/CircularProgress";
@@ -30,8 +29,11 @@ import { useAuth } from "@/lib/providers/auth-provider";
 import useToast from "@/lib/hooks/use-toast";
 import { ServerCreationResponse } from "@/lib/types/queries/create-server";
 import usePostMutation from "@/lib/hooks/use-post-mutation";
+import { CreateServerProps } from "@/lib/types/components/create-server";
 
-function CreateServer() {
+const CreateServer: React.FC<CreateServerProps> = ({
+  renderCreateServerTriggerComponent,
+}) => {
   const { user } = useAuth();
   const { showErrorToast, showToast } = useToast();
   const { performPostRequest, data, error, isLoading } =
@@ -62,7 +64,7 @@ function CreateServer() {
   };
 
   const handleCreateServer = async (data: CreateServerFormData) => {
-    performPostRequest(`${API_URL}/servers`, { ...data, userId: user.uid });
+    performPostRequest(`${API_URL}/servers`, { ...data, userId: user?.uid });
   };
 
   const handleCancelBtnClick = () => {
@@ -166,7 +168,7 @@ function CreateServer() {
             render={({ field }) => (
               <FormItem className="md:w-[60%]  mx-auto">
                 <FormControl>
-                  <Input placeholder="Server name" className="" {...field} />
+                  <Input placeholder="Server name" {...field} />
                 </FormControl>
                 <FormMessage className="text-red-500">
                   {form.formState.errors.serverName?.message}
@@ -181,11 +183,8 @@ function CreateServer() {
 
   return (
     <>
-      <TooltipComponent tooltipText="Create server" placement="right">
-        <div>
-          <ServerBadge isCreateServer onClick={showModal} />
-        </div>
-      </TooltipComponent>
+      {renderCreateServerTriggerComponent(showModal)}
+
       <PromptModal
         isModalOpen={isModalOpen}
         showModal={showModal}
@@ -199,6 +198,6 @@ function CreateServer() {
       />
     </>
   );
-}
+};
 
 export default CreateServer;
