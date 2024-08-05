@@ -32,7 +32,7 @@ const FileUplaod: React.FC<FileUploadProps> = ({
       },
       skipPolling: true,
       headers: {
-        authorization: user?.uid ?? "",
+        authorization: user.uid,
       },
     }
   );

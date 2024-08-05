@@ -1,60 +1,8 @@
-import { auth } from "../firebase/config";
-import { EXPIRY_TIME, TOKEN, USER_INFO } from "../constants";
 import { AuthActionTypes, AuthReducerType, AuthState } from "../types/auth";
-
-export const getExpiryTimeFromToken = (token: string) => {
-  const [, payload] = token.split(".");
-  const { exp } = JSON.parse(atob(payload));
-  return exp * 1000;
-};
-
-export const isUserValid = (isTokenExpireCheck = false) => {
-  const accessToken = localStorage.getItem(TOKEN);
-  const expiryTimeStr = localStorage.getItem(EXPIRY_TIME);
-  const user = localStorage.getItem(USER_INFO);
-  const userId = user ? JSON.parse(user).uid : null;
-  const tokenExpireTime = expiryTimeStr ? JSON.parse(expiryTimeStr) : null;
-  if (isTokenExpireCheck) {
-    if (
-      accessToken &&
-      tokenExpireTime &&
-      !(tokenExpireTime > Date.now()) &&
-      userId
-    ) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-  if (
-    accessToken &&
-    tokenExpireTime &&
-    tokenExpireTime > Date.now() &&
-    userId
-  ) {
-    return true;
-  }
-  return false;
-};
-
-export const refreshToken = async () => {
-  const user = auth.currentUser;
-  if (user) {
-    const idToken = user.getIdToken(true);
-    const expiryTime = JSON.stringify(getExpiryTimeFromToken(await idToken));
-    localStorage.setItem(TOKEN, await idToken);
-    localStorage.setItem(EXPIRY_TIME, expiryTime);
-  } else {
-    throw new Error("No user logged in");
-  }
-};
-
-export const setTokenAndExpiryTime = (user: any) => {
-  const token = user.accessToken;
-  const expire = JSON.stringify(user?.stsTokenManager?.expirationTime);
-  localStorage.setItem(TOKEN, token);
-  localStorage.setItem(EXPIRY_TIME, expire);
-};
+import { importPKCS8, jwtVerify, JWTPayload, SignJWT, importSPKI } from "jose";
+import { nanoid } from "nanoid";
+import { NextRequest, NextResponse } from "next/server";
+import { LOGIN } from "../routes";
 
 export const isBrowser = (): boolean => typeof window !== "undefined";
 
@@ -94,4 +42,39 @@ export const authErrorMessages: { [key: string]: string } = {
   "auth/account-exists-with-different-credential":
     "This account already exists with a different credential",
   "default-signup-error": "Could not create your account. Please try again",
+};
+
+const publicKeyString = process.env.JWT_PUBLIC_KEY!;
+const privateKeyString = process.env.JWT_PRIVATE_KEY!;
+
+let privateKey: CryptoKey;
+let publicKey: CryptoKey;
+
+export async function initKeys() {
+  privateKey = await importPKCS8(privateKeyString, "RS256");
+  publicKey = await importSPKI(publicKeyString, "RS256");
+}
+
+export async function createJwtToken(payload: JWTPayload, expiresIn: string) {
+  const jwt = await new SignJWT(payload)
+    .setProtectedHeader({ alg: "RS256" })
+    .setJti(nanoid())
+    .setIssuedAt()
+    .setExpirationTime(expiresIn)
+    .sign(privateKey);
+  return jwt;
+}
+
+export async function verifyJwtToken(token: string) {
+  return jwtVerify(token, publicKey, { algorithms: ["RS256"] });
+}
+
+export function redirectToLogin(request: NextRequest) {
+  const url = new URL(LOGIN, request.url);
+  url.searchParams.set("redirect", request.nextUrl.pathname);
+  return NextResponse.redirect(url);
+}
+
+export const deleteCookie = (name: string) => {
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;`;
 };

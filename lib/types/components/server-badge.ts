@@ -1,6 +1,6 @@
 export interface ServerBadgeProps {
   isCreateServer?: boolean;
-  onClick?: () => void;
+  handleClick?: () => void;
   className?: string;
   icon?: JSX.Element;
   serverImage?: string;

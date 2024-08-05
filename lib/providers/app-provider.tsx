@@ -15,6 +15,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   const [isMobile, setIsMobile] = useState<boolean>(false);
 
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
@@ -30,7 +36,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
   }, []);
 
   return (
-    <AppContext.Provider value={{ isMobile }}>{children}</AppContext.Provider>
+    <AppContext.Provider value={{ isMobile, isClient }}>
+      {children}
+    </AppContext.Provider>
   );
 };
 

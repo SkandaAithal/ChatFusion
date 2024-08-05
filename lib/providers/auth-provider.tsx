@@ -13,23 +13,14 @@ import {
   SignInFormData,
   SignUpFormData,
 } from "@/lib/types/auth";
-import {
-  API_URL,
-  EXPIRY_TIME,
-  SIGN_IN_SUCCESSFUL,
-  TOKEN,
-  USER_INFO,
-} from "@/lib/constants";
-import { useRouter } from "next/navigation";
+import { SIGN_IN_SUCCESSFUL, USER_INFO } from "@/lib/constants";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   authErrorMessages,
   authReducer,
   initailAuthState,
-  isUserValid,
-  refreshToken,
-  setTokenAndExpiryTime,
 } from "@/lib/utils/auth";
-import { HOME, LOGIN } from "@/lib/routes";
+import { HOME, LOGIN, USER_AUTH_API } from "@/lib/routes";
 import usePersistentReducer from "@/lib/hooks/use-persistent-reducer";
 import {
   useCreateUserWithEmailAndPassword,
@@ -44,13 +35,17 @@ import {
 } from "@/lib/firebase/config";
 import useToast from "@/lib/hooks/use-toast";
 import usePostMutation from "../hooks/use-post-mutation";
+import { getAPIUrl } from "../utils";
+import { ToastTypeValues } from "../types/hooks/use-toast";
 const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider: React.FunctionComponent<
   React.PropsWithChildren<unknown>
 > = ({ children }) => {
   const router = useRouter();
+  const queryparams = useSearchParams();
+  const redirectUrl = queryparams.get("redirect");
   const { showToast, showErrorToast } = useToast();
-  const { performPostRequest } = usePostMutation();
+  const { performPostRequest, isSuccess } = usePostMutation();
   const [isLoggedin, setIsLoggedin] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [createUserWithEmailAndPassword, , isSignUpLoading, signUpError] =
@@ -75,30 +70,37 @@ export const AuthProvider: React.FunctionComponent<
     [isGithubLoading, isGoogleLoading, isEmailSignInLoading, isAuthLoading]
   );
 
-  const validateUser = async () => {
-    try {
-      if (isUserValid(true)) {
-        await refreshToken();
-      }
-    } catch (e) {
-      setIsLoggedin(false);
-      router.push(LOGIN);
-    }
-  };
-
-  const storageEventListener = useCallback((event: any) => {
-    if (event.key === TOKEN || event.key === EXPIRY_TIME) {
-      if (
-        !event.storageArea?.[TOKEN] ||
-        !event.storageArea?.[EXPIRY_TIME] ||
-        !event.storageArea?.[USER_INFO]
-      ) {
-        setIsLoggedin(false);
-        router.push(LOGIN);
-      }
+  useEffect(() => {
+    if (redirectUrl) {
+      showToast("Session expired! Please login", ToastTypeValues.WARNING);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [redirectUrl]);
+
+  useEffect(() => {
+    const error = signInError || signUpError || githubError;
+
+    if (error?.code) {
+      const errorMessage =
+        authErrorMessages[error.code] ||
+        (signInError && "An unknown error occurred during sign-in") ||
+        (signUpError && authErrorMessages["default-signup-error"]) ||
+        (githubError &&
+          "An unknown error occurred during GitHub authentication");
+
+      showErrorToast(errorMessage as string);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signInError, signUpError, githubError]);
+
+  useEffect(() => {
+    if (isSuccess) {
+      router.push(redirectUrl ? redirectUrl : HOME);
+      showToast(SIGN_IN_SUCCESSFUL);
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSuccess]);
 
   const handleAuth = useCallback(
     async (authMethod: () => Promise<any>) => {
@@ -113,12 +115,9 @@ export const AuthProvider: React.FunctionComponent<
             userImage: userCredential.user.photoURL,
           };
 
-          performPostRequest(`${API_URL}/users`, payload);
-          setTokenAndExpiryTime(userCredential.user);
+          performPostRequest(getAPIUrl(USER_AUTH_API), payload);
           setIsLoggedin(true);
           dispatch({ type: AuthActionTypes.CREATE_USER, payload });
-          showToast(SIGN_IN_SUCCESSFUL);
-          router.push(HOME);
         }
       } catch (err) {
         showErrorToast("Error signing in! Please try again.");
@@ -170,44 +169,6 @@ export const AuthProvider: React.FunctionComponent<
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
-
-  useEffect(() => {
-    const error = signInError || signUpError || githubError;
-
-    if (error?.code) {
-      const errorMessage =
-        authErrorMessages[error.code] ||
-        (signInError && "An unknown error occurred during sign-in") ||
-        (signUpError && authErrorMessages["default-signup-error"]) ||
-        (githubError &&
-          "An unknown error occurred during GitHub authentication");
-
-      showErrorToast(errorMessage as string);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [signInError, signUpError, githubError]);
-
-  useEffect(() => {
-    window.addEventListener("storage", storageEventListener);
-    return () => {
-      window.removeEventListener("storage", storageEventListener);
-    };
-  }, [storageEventListener]);
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout | undefined;
-
-    if (isLoggedin) {
-      interval = setInterval(validateUser, 1000);
-    }
-
-    return () => {
-      if (interval) {
-        clearInterval(interval);
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoggedin]);
 
   return (
     <AuthContext.Provider

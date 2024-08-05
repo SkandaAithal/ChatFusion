@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const API_URL = process.env.NEXT_PUBLIC_API_ROUTE;
+
 export const signUpFormSchema = z.object({
   firstname: z
     .string()
@@ -53,8 +54,9 @@ export const signInFormSchema = z.object({
     .transform((val) => val.trim()),
 });
 
-export const TOKEN = "idToken";
-export const EXPIRY_TIME = "expiresIn";
+export const ACCESS_TOKEN = "accessToken";
+export const REFRESH_TOKEN = "refreshToken";
+export const TIME_EXPIRE = 60 * 60 * 24 * 7;
 export const USER_INFO = "userInfo";
 export const SIGN_IN_SUCCESSFUL = "Signed in successfully";
 export const APP_THEME = "chat-fusion-theme";

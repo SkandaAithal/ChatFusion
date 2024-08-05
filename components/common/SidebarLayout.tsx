@@ -17,7 +17,7 @@ const SidebarLayout = () => {
   const renderAddServerBadge = (showModal: () => void) => (
     <TooltipComponent tooltipText="Create server" placement="right">
       <div>
-        <ServerBadge isCreateServer onClick={showModal} />
+        <ServerBadge isCreateServer handleClick={showModal} />
       </div>
     </TooltipComponent>
   );

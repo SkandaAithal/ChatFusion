@@ -8,7 +8,6 @@ import { BiImageAlt } from "react-icons/bi";
 import { CreateServerFormData } from "@/lib/types/common";
 import { useForm } from "react-hook-form";
 import {
-  API_URL,
   createServerFormSchema,
   FILE_UPLOAD_SERVER_IMAGE,
 } from "@/lib/constants";
@@ -30,6 +29,8 @@ import useToast from "@/lib/hooks/use-toast";
 import { ServerCreationResponse } from "@/lib/types/queries/create-server";
 import usePostMutation from "@/lib/hooks/use-post-mutation";
 import { CreateServerProps } from "@/lib/types/components/create-server";
+import { SERVERS_API } from "@/lib/routes";
+import { getAPIUrl } from "@/lib/utils";
 
 const CreateServer: React.FC<CreateServerProps> = ({
   renderCreateServerTriggerComponent,
@@ -45,7 +46,7 @@ const CreateServer: React.FC<CreateServerProps> = ({
   const [uploadError, setUploadError] = useState("");
 
   const showModal = () => {
-    setIsModalOpen(!isModalOpen);
+    setIsModalOpen(true);
   };
   const form = useForm<CreateServerFormData>({
     resolver: zodResolver(createServerFormSchema),
@@ -64,7 +65,10 @@ const CreateServer: React.FC<CreateServerProps> = ({
   };
 
   const handleCreateServer = async (data: CreateServerFormData) => {
-    performPostRequest(`${API_URL}/servers`, { ...data, userId: user?.uid });
+    performPostRequest(getAPIUrl(SERVERS_API), {
+      ...data,
+      userId: user?.uid,
+    });
   };
 
   const handleCancelBtnClick = () => {
@@ -90,7 +94,7 @@ const CreateServer: React.FC<CreateServerProps> = ({
       showErrorToast(error.message);
     } else if (data) {
       form.reset();
-      showModal();
+      setIsModalOpen(false);
       showToast(data.message);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -187,7 +191,7 @@ const CreateServer: React.FC<CreateServerProps> = ({
 
       <PromptModal
         isModalOpen={isModalOpen}
-        showModal={showModal}
+        showModal={setIsModalOpen}
         modalTitle="Create your server"
         modalDescription="Easily create and customize your own servers with unique names, icons, and themes."
         handlePrimaryAction={form.handleSubmit(handleCreateServer)}

@@ -38,6 +38,9 @@ body,
     --ring: 0 0% 65%;
 
     --radius: 0.5rem;
+
+    --loader-background-color: #eeeeee;
+    --loader-highlight-color: #dbdbdb;
   }
 
   .dark {
@@ -68,6 +71,9 @@ body,
     --border: 12 6.5% 15.1%;
     --input: 12 6.5% 15.1%;
     --ring: 24 5.7% 82.9%;
+
+    --loader-background-color: #333333;
+    --loader-highlight-color: #4f4f4f;
   }
 }
 
@@ -80,7 +86,6 @@ body,
   }
 }
 
-/* styles.css */
 .loading-wave {
   width: 300px;
   height: 100px;
@@ -189,7 +194,7 @@ body,
 }
 
 .scroller[data-animated="true"] .scroller__inner {
-  animation: scroll var(--_animation-duration, 60s)
+  animation: scroll var(--_animation-duration, 40s)
     var(--_animation-direction, forwards) linear infinite;
 }
 
@@ -236,11 +241,11 @@ body,
 }
 
 .scroller[data-speed="fast"] {
-  --_animation-duration: 40s;
+  --_animation-duration: 20s;
 }
 
 .scroller[data-speed="slow"] {
-  --_animation-duration: 80s;
+  --_animation-duration: 60s;
 }
 
 .scroller[data-flex-direction="row"] {
@@ -265,4 +270,25 @@ body,
 .scroller[data-flex-direction="column"] .scroller__inner {
   --translate-end: translateY(calc(-50% + 0.5rem));
   height: max-content;
+}
+
+.skeleton-loader {
+  background: linear-gradient(
+    90deg,
+    var(--loader-background-color) 25%,
+    var(--loader-highlight-color) 50%,
+    var(--loader-background-color) 75%
+  );
+
+  background-size: 200% 100%;
+  animation: loading 2s infinite ease-in-out;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }

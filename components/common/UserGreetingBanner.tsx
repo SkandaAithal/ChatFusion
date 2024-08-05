@@ -35,15 +35,19 @@ const UserGreetingBanner = () => {
       </div>
 
       <div className="w-full  md:h-screen grid place-content-center">
-        <Scroller direction="right" flexDirection={isMobile ? "row" : "column"}>
+        <Scroller
+          direction="right"
+          flexDirection={isMobile ? "row" : "column"}
+          speed="slow"
+        >
           {LANDING_PAGE_IMAGES.map((src) => (
             <Image
               src={src}
               alt="landing-page"
-              width={isMobile ? 220 : 360}
-              height={isMobile ? 200 : 320}
+              width={400}
+              height={400}
               key={src}
-              className="object-cover rounded-xl"
+              className="object-cover rounded-xl w-60 h-60 md:w-80 md:h-80 lg:w-96 lg:h-96"
             />
           ))}
         </Scroller>

@@ -5,7 +5,6 @@ import { ThemeProvider } from "@/lib/providers/theme-provider";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AuthProvider } from "@/lib/providers/auth-provider";
-import ProtectedRoute from "@/components/auth-components/ProtectedRoute";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { extractRouterConfig } from "uploadthing/server";
 import { ourFileRouter } from "./api/uploadthing/core";
@@ -47,7 +46,7 @@ export default function RootLayout({
                   routerConfig={extractRouterConfig(ourFileRouter)}
                 />
                 <ToastContainer />
-                <ProtectedRoute>{children}</ProtectedRoute>
+                {children}
               </AppProvider>
             </AuthProvider>
           </ThemeProvider>

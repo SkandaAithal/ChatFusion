@@ -134,7 +134,7 @@ const SidePanel: React.FC<SidePanelProps> = ({
   sheetTitle,
   side,
 }) => (
-  <Sheet>
+  <Sheet modal={false}>
     <SheetTrigger asChild>{sheetTrigger}</SheetTrigger>
     <SheetContent className="m-0 p-0 w-fit" side={side}>
       <SheetHeader>

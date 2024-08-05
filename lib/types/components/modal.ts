@@ -1,6 +1,6 @@
 export interface PromptModalProps {
   isModalOpen: boolean;
-  showModal: () => void;
+  showModal: React.Dispatch<boolean>;
   modalTitle: string;
   handlePrimaryAction?: () => void;
   handleCloseModalAction?: () => void;

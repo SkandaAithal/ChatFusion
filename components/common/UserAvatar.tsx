@@ -1,7 +1,6 @@
 "use client";
 import React, { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { useAuth } from "../../lib/providers/auth-provider";
 import { getInitials } from "@/lib/utils";
 import { FaUserAlt } from "react-icons/fa";
 import { useRouter } from "next/navigation";
@@ -22,14 +21,18 @@ import { MdLogout } from "react-icons/md";
 import PromptModal from "../modals/PromptModal";
 import TooltipComponent from "../ui/tooltip";
 import { useTheme } from "next-themes";
-import { APP_THEME } from "@/lib/constants";
+import { ACCESS_TOKEN, APP_THEME } from "@/lib/constants";
+import { useApp } from "@/lib/providers/app-provider";
+import { useAuth } from "@/lib/providers/auth-provider";
+import { deleteCookie } from "@/lib/utils/auth";
 function UserAvatar() {
   const router = useRouter();
   const { theme } = useTheme();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { isClient } = useApp();
   const { dispatch, user, setIsAuthLoading } = useAuth();
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const showModal = () => {
-    setIsModalOpen(!isModalOpen);
+    setIsModalOpen(true);
   };
   const userImage = user.userImage;
   const userName = user.userName;
@@ -38,50 +41,43 @@ function UserAvatar() {
   const handleLogout = async () => {
     setIsAuthLoading(false);
     await signOut(auth);
-    router.push(LOGIN);
+    deleteCookie(ACCESS_TOKEN);
     localStorage.clear();
     localStorage.setItem(APP_THEME, theme as string);
     setIsModalOpen(false);
+    router.push(LOGIN);
     dispatch({ type: AuthActionTypes.SIGN_OUT_USER });
   };
 
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button
-            className="outline-none border border-none rounded-full h-16 w-16 overflow-hidden"
-            aria-label="Customise options"
-          >
-            <TooltipComponent tooltipText={userName} placement="right">
-              <Avatar className="cursor-pointer w-full h-full">
-                {userImage ? (
-                  <AvatarImage
-                    src={userImage}
-                    className="hover:scale-125  duration-300"
-                  />
-                ) : (
-                  <AvatarFallback className="text-2xl hover:scale-110  duration-300">
-                    {initials ? initials : <FaUserAlt />}
-                  </AvatarFallback>
-                )}
-              </Avatar>
-            </TooltipComponent>
-          </button>
+      <DropdownMenu modal={false}>
+        <DropdownMenuTrigger>
+          <TooltipComponent tooltipText={userName} placement="right">
+            <Avatar className="cursor-pointer outline-none border border-none rounded-full h-16 w-16 overflow-hidden">
+              {userImage && isClient ? (
+                <AvatarImage
+                  src={userImage}
+                  className="hover:scale-125 duration-300"
+                />
+              ) : (
+                <AvatarFallback className="text-2xl hover:scale-110 duration-300">
+                  {initials && isClient ? initials : <FaUserAlt />}
+                </AvatarFallback>
+              )}
+            </Avatar>
+          </TooltipComponent>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-40">
           <DropdownMenuLabel>My Account</DropdownMenuLabel>
           <DropdownMenuSeparator />
-
           <DropdownMenuItem className="w-full">
             Profile
             <DropdownMenuShortcut>
               <FaUserAlt size={16} />
             </DropdownMenuShortcut>
           </DropdownMenuItem>
-
           <DropdownMenuSeparator />
-
           <DropdownMenuItem className="w-full" onClick={showModal}>
             Log out
             <DropdownMenuShortcut>
@@ -90,9 +86,10 @@ function UserAvatar() {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
       <PromptModal
         isModalOpen={isModalOpen}
-        showModal={showModal}
+        showModal={setIsModalOpen}
         showLogo
         modalTitle="Are you sure you want to Logout?"
         handlePrimaryAction={handleLogout}

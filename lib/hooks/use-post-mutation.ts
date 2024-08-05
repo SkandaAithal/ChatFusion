@@ -11,8 +11,10 @@ const usePostMutation = <T>(queryKeyToRefetch?: string[]) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation<T, AxiosError, ApiPostParams>({
-    mutationFn: ({ endpoint, body }: ApiPostParams) =>
-      axios.post(endpoint, body).then((response) => response.data),
+    mutationFn: async ({ endpoint, body }: ApiPostParams) => {
+      const response = await axios.post(endpoint, body);
+      return response.data;
+    },
     onSuccess: () => {
       if (queryKeyToRefetch) {
         queryKeyToRefetch.forEach((key) => {
