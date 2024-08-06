@@ -3,6 +3,7 @@ import { importPKCS8, jwtVerify, JWTPayload, SignJWT, importSPKI } from "jose";
 import { nanoid } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
 import { LOGIN } from "../routes";
+import CryptoJS from "crypto-js";
 
 export const isBrowser = (): boolean => typeof window !== "undefined";
 
@@ -78,3 +79,18 @@ export function redirectToLogin(request: NextRequest) {
 export const deleteCookie = (name: string) => {
   document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;`;
 };
+
+export async function encryptToken(
+  token: string,
+  secretKey: string
+): Promise<string> {
+  return CryptoJS.AES.encrypt(token, secretKey).toString();
+}
+
+export async function decryptToken(
+  encryptedToken: string,
+  secretKey: string
+): Promise<string> {
+  const bytes = CryptoJS.AES.decrypt(encryptedToken, secretKey);
+  return bytes.toString(CryptoJS.enc.Utf8);
+}

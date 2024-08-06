@@ -20,14 +20,12 @@ import {
 import { MdLogout } from "react-icons/md";
 import PromptModal from "../modals/PromptModal";
 import TooltipComponent from "../ui/tooltip";
-import { useTheme } from "next-themes";
-import { ACCESS_TOKEN, APP_THEME } from "@/lib/constants";
+import { ACCESS_TOKEN } from "@/lib/constants";
 import { useApp } from "@/lib/providers/app-provider";
 import { useAuth } from "@/lib/providers/auth-provider";
 import { deleteCookie } from "@/lib/utils/auth";
 function UserAvatar() {
   const router = useRouter();
-  const { theme } = useTheme();
   const { isClient } = useApp();
   const { dispatch, user, setIsAuthLoading } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -42,8 +40,6 @@ function UserAvatar() {
     setIsAuthLoading(false);
     await signOut(auth);
     deleteCookie(ACCESS_TOKEN);
-    localStorage.clear();
-    localStorage.setItem(APP_THEME, theme as string);
     setIsModalOpen(false);
     router.push(LOGIN);
     dispatch({ type: AuthActionTypes.SIGN_OUT_USER });

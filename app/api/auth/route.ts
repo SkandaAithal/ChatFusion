@@ -1,7 +1,13 @@
 import { db } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
-import { createJwtToken, initKeys } from "@/lib/utils/auth";
-import { ACCESS_TOKEN, REFRESH_TOKEN, TIME_EXPIRE } from "@/lib/constants";
+import { createJwtToken, encryptToken, initKeys } from "@/lib/utils/auth";
+import {
+  ACCESS_TOKEN,
+  REFRESH_TOKEN,
+  REFRESH_TOKEN_SECRET_KEY,
+  TIME_EXPIRE,
+  TOKEN_SECRET_KEY,
+} from "@/lib/constants";
 
 export async function POST(request: NextRequest) {
   const user = await request.json();
@@ -19,21 +25,32 @@ export async function POST(request: NextRequest) {
     },
   });
 
+  // Generate tokens
   const accessToken = await createJwtToken({ userId: user.uid }, "10s");
   const refreshToken = await createJwtToken({ userId: user.uid }, "7d");
+
+  // Encrypt tokens
+  const encryptedAccessToken = await encryptToken(
+    accessToken,
+    TOKEN_SECRET_KEY!
+  );
+  const encryptedRefreshToken = await encryptToken(
+    refreshToken,
+    REFRESH_TOKEN_SECRET_KEY!
+  );
 
   const response = NextResponse.json({
     message: userProfile ? "User already exists" : "User created successfully",
   });
 
-  response.cookies.set(ACCESS_TOKEN, accessToken, {
-    httpOnly: false,
+  response.cookies.set(ACCESS_TOKEN, encryptedAccessToken, {
+    httpOnly: true,
     secure: true,
     path: "/",
     maxAge: TIME_EXPIRE,
   });
 
-  response.cookies.set(REFRESH_TOKEN, refreshToken, {
+  response.cookies.set(REFRESH_TOKEN, encryptedRefreshToken, {
     httpOnly: true,
     secure: true,
     path: "/",

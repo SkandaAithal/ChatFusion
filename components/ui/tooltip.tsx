@@ -43,9 +43,13 @@ const TooltipComponent: React.FC<TooltipProps> = ({
   <TooltipProvider delayDuration={100}>
     <Tooltip>
       <TooltipTrigger asChild>{children}</TooltipTrigger>
-      <TooltipContent side={placement} align={align} className={className}>
-        {tooltipText}
-      </TooltipContent>
+      {tooltipText ? (
+        <TooltipContent side={placement} align={align} className={className}>
+          {tooltipText}
+        </TooltipContent>
+      ) : (
+        <></>
+      )}
     </Tooltip>
   </TooltipProvider>
 );

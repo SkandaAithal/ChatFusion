@@ -5,8 +5,16 @@ import {
   verifyJwtToken,
   createJwtToken,
   redirectToLogin,
+  decryptToken,
+  encryptToken,
 } from "./lib/utils/auth";
-import { ACCESS_TOKEN, REFRESH_TOKEN, TIME_EXPIRE } from "./lib/constants";
+import {
+  ACCESS_TOKEN,
+  REFRESH_TOKEN,
+  REFRESH_TOKEN_SECRET_KEY,
+  TIME_EXPIRE,
+  TOKEN_SECRET_KEY,
+} from "./lib/constants";
 import { JWTExpired } from "jose/errors";
 import { UNPROTECTED_ROUTES } from "./lib/routes";
 
@@ -19,15 +27,27 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const accessToken = request.cookies.get(ACCESS_TOKEN)?.value;
-  const refreshToken = request.cookies.get(REFRESH_TOKEN)?.value;
+  const encryptedAccessToken = request.cookies.get(ACCESS_TOKEN)?.value;
+  const encryptedRefreshToken = request.cookies.get(REFRESH_TOKEN)?.value;
 
-  if (!accessToken) {
+  if (!encryptedAccessToken || !encryptedRefreshToken) {
     return redirectToLogin(request);
   }
 
+  // Decrypt tokens
+  const accessToken = await decryptToken(
+    encryptedAccessToken,
+    TOKEN_SECRET_KEY!
+  );
+
+  const refreshToken = await decryptToken(
+    encryptedRefreshToken,
+    REFRESH_TOKEN_SECRET_KEY!
+  );
+
   try {
     await verifyJwtToken(accessToken);
+
     return NextResponse.next();
   } catch (error) {
     if ((error as JWTExpired).code === "ERR_JWT_EXPIRED" && refreshToken) {
@@ -42,8 +62,14 @@ export async function middleware(request: NextRequest) {
           "10s"
         );
 
+        // Encrypt new access token
+        const encryptedNewAccessToken = await encryptToken(
+          newAccessToken,
+          TOKEN_SECRET_KEY!
+        );
+
         const response = NextResponse.next();
-        response.cookies.set(ACCESS_TOKEN, newAccessToken, {
+        response.cookies.set(ACCESS_TOKEN, encryptedNewAccessToken, {
           httpOnly: false,
           secure: true,
           path: "/",
