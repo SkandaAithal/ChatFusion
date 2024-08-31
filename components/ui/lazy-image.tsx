@@ -20,6 +20,8 @@ const LazyImage: React.FC<LazyImageProps> = ({
   useEffect(() => {
     if (src && !isLazyLoad) {
       setTimeout(() => setImageUrl(src), 1000);
+    } else {
+      setImageUrl(src);
     }
   }, [isLazyLoad, src]);
 
@@ -31,7 +33,6 @@ const LazyImage: React.FC<LazyImageProps> = ({
     setImageUrl("/assets/placeholder-error-image.jpg");
   };
 
-  const isImgUrl = isLazyLoad ? src : imageUrl;
   return (
     <div className="relative h-full w-full">
       {!isImageLoaded && (
@@ -43,9 +44,9 @@ const LazyImage: React.FC<LazyImageProps> = ({
         />
       )}
 
-      {isImgUrl && (
+      {imageUrl && (
         <Image
-          src={isImgUrl}
+          src={imageUrl}
           alt={alt}
           fill={isEmpty(imageDimensions)}
           onLoad={handleLoad}

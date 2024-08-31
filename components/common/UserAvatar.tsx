@@ -20,14 +20,13 @@ import {
 import { MdLogout } from "react-icons/md";
 import PromptModal from "../modals/PromptModal";
 import TooltipComponent from "../ui/tooltip";
-import { ACCESS_TOKEN } from "@/lib/constants";
 import { useApp } from "@/lib/providers/app-provider";
 import { useAuth } from "@/lib/providers/auth-provider";
-import { deleteCookie } from "@/lib/utils/auth";
+import { deleteCookies } from "@/lib/utils/server-actions";
 function UserAvatar() {
   const router = useRouter();
-  const { isClient } = useApp();
-  const { dispatch, user, setIsAuthLoading } = useAuth();
+  const { isClient, setIsAuthLoading } = useApp();
+  const { dispatch, user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const showModal = () => {
     setIsModalOpen(true);
@@ -39,7 +38,7 @@ function UserAvatar() {
   const handleLogout = async () => {
     setIsAuthLoading(false);
     await signOut(auth);
-    deleteCookie(ACCESS_TOKEN);
+    deleteCookies();
     setIsModalOpen(false);
     router.push(LOGIN);
     dispatch({ type: AuthActionTypes.SIGN_OUT_USER });

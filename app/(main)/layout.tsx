@@ -3,9 +3,11 @@ import SidebarLayout from "../../components/common/SidebarLayout";
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen flex">
+    <div className="flex">
       <SidebarLayout />
-      {children}
+      <div className="h-screen overflow-y-auto w-full pt-16 md:p-0">
+        {children}
+      </div>
     </div>
   );
 }

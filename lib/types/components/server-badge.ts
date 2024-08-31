@@ -4,4 +4,5 @@ export interface ServerBadgeProps {
   className?: string;
   icon?: JSX.Element;
   serverImage?: string;
+  lazyLoadServerImage?: boolean;
 }

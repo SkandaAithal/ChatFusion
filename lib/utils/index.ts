@@ -1,10 +1,15 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { API_URL } from "../constants";
+import { APP_URL } from "../constants";
+import { SERVERS_API, USER_PROFILE_API } from "../routes";
+import { axiosInstance } from "./axios";
+import axios from "axios";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+export const isBrowser = (): boolean => typeof window !== "undefined";
 
 export function getInitials(fullName: string): string {
   const nameParts = fullName.trim().split(/\s+/);
@@ -15,12 +20,32 @@ export function getInitials(fullName: string): string {
   );
 }
 
-export const isEmpty = (object: any) => {
-  if (!object) return true;
-  if (Array.isArray(object)) return !object?.length;
-  return !Object.keys(object).length;
+export const isEmpty = (object: any): boolean => {
+  if (
+    object === null ||
+    object === undefined ||
+    object === false ||
+    object === ""
+  )
+    return true;
+
+  if (Array.isArray(object))
+    return object.length === 0 || object.every(isEmpty);
+
+  if (typeof object === "object") {
+    return (
+      Object.keys(object).length === 0 || Object.values(object).every(isEmpty)
+    );
+  }
+
+  return false;
 };
 
 export function getAPIUrl(apiUrl: string): string {
-  return `${API_URL}${apiUrl}`;
+  return `${APP_URL}${apiUrl}`;
 }
+
+export const queryData = async (apiUrl: string) => {
+  const response = await axiosInstance.get(getAPIUrl(apiUrl));
+  return response.data;
+};

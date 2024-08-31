@@ -10,11 +10,11 @@ import {
 } from "react";
 import CryptoJS from "crypto-js";
 
-import { isBrowser } from "../utils/auth";
 import {
   ReducerDefaultState,
   ReducerDefaultStateFunction,
 } from "../types/hooks/persistent-reducer";
+import { isBrowser } from "../utils";
 
 const SECRET_KEY = process.env.NEXT_PUBLIC_LOCAL_STORAGE_SECRET_KEY;
 

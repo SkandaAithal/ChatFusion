@@ -33,24 +33,24 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={oprnSans.className}>
-        <TanStackProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem={false}
-            storageKey={APP_THEME}
-          >
-            <AuthProvider>
-              <AppProvider>
+        <AppProvider>
+          <TanStackProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="dark"
+              enableSystem={false}
+              storageKey={APP_THEME}
+            >
+              <AuthProvider>
                 <NextSSRPlugin
                   routerConfig={extractRouterConfig(ourFileRouter)}
                 />
                 <ToastContainer />
                 {children}
-              </AppProvider>
-            </AuthProvider>
-          </ThemeProvider>
-        </TanStackProvider>
+              </AuthProvider>
+            </ThemeProvider>
+          </TanStackProvider>
+        </AppProvider>
       </body>
     </html>
   );

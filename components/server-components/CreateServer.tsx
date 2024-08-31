@@ -24,18 +24,18 @@ import {
 import FileUplaod from "../common/FileUpload";
 import { twMerge } from "tailwind-merge";
 import { Input } from "../ui/input";
-import { useAuth } from "@/lib/providers/auth-provider";
 import useToast from "@/lib/hooks/use-toast";
-import { ServerCreationResponse } from "@/lib/types/queries/create-server";
 import usePostMutation from "@/lib/hooks/use-post-mutation";
 import { CreateServerProps } from "@/lib/types/components/create-server";
-import { SERVERS_API } from "@/lib/routes";
+import { SERVERS, SERVERS_API } from "@/lib/routes";
 import { getAPIUrl } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { ServerCreationResponse } from "@/lib/types/queries/servers";
 
 const CreateServer: React.FC<CreateServerProps> = ({
   renderCreateServerTriggerComponent,
 }) => {
-  const { user } = useAuth();
+  const router = useRouter();
   const { showErrorToast, showToast } = useToast();
   const { performPostRequest, data, error, isLoading } =
     usePostMutation<ServerCreationResponse>();
@@ -45,9 +45,6 @@ const CreateServer: React.FC<CreateServerProps> = ({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadError, setUploadError] = useState("");
 
-  const showModal = () => {
-    setIsModalOpen(true);
-  };
   const form = useForm<CreateServerFormData>({
     resolver: zodResolver(createServerFormSchema),
     defaultValues: {
@@ -55,6 +52,10 @@ const CreateServer: React.FC<CreateServerProps> = ({
       imageUrl: "",
     },
   });
+
+  const showModal = () => {
+    setIsModalOpen(true);
+  };
 
   const getImageUploadingStatus = (isUpload: boolean) => {
     setIsUploading(isUpload);
@@ -67,7 +68,6 @@ const CreateServer: React.FC<CreateServerProps> = ({
   const handleCreateServer = async (data: CreateServerFormData) => {
     performPostRequest(getAPIUrl(SERVERS_API), {
       ...data,
-      userId: user?.uid,
     });
   };
 
@@ -96,6 +96,7 @@ const CreateServer: React.FC<CreateServerProps> = ({
       form.reset();
       setIsModalOpen(false);
       showToast(data.message);
+      router.push(SERVERS);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error, data]);

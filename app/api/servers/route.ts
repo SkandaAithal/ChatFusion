@@ -2,17 +2,14 @@ import { v4 as uuidV4 } from "uuid";
 import { db } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { MemberRole } from "@prisma/client";
+import { USER_ID } from "@/lib/constants";
+import { getServersByRole } from "@/lib/utils/server-actions";
 
 export async function POST(request: NextRequest) {
   try {
-    const { serverName, imageUrl, userId } = await request.json();
+    const { serverName, imageUrl } = await request.json();
 
-    if (!userId) {
-      return NextResponse.json(
-        { message: "UnAuthorized user" },
-        { status: 401 }
-      );
-    }
+    const userId = request.headers.get(USER_ID) as string;
 
     const server = await db.server.create({
       data: {
@@ -42,4 +39,10 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+export async function GET(request: NextRequest) {
+  const userId = request.headers.get(USER_ID) as string;
+  const servers = await getServersByRole(userId);
+  return NextResponse.json(servers);
 }

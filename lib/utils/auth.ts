@@ -4,8 +4,7 @@ import { nanoid } from "nanoid";
 import { NextRequest, NextResponse } from "next/server";
 import { LOGIN } from "../routes";
 import CryptoJS from "crypto-js";
-
-export const isBrowser = (): boolean => typeof window !== "undefined";
+import { TOKEN_SECRET_KEY } from "../constants";
 
 export const initailAuthState: AuthState = {
   uid: "",
@@ -94,3 +93,19 @@ export async function decryptToken(
   const bytes = CryptoJS.AES.decrypt(encryptedToken, secretKey);
   return bytes.toString(CryptoJS.enc.Utf8);
 }
+
+export const getUserId = async (encrytedToken: string) => {
+  try {
+    await initKeys();
+    const token = await decryptToken(
+      encrytedToken as string,
+      TOKEN_SECRET_KEY!
+    );
+
+    const { payload } = await verifyJwtToken(token);
+
+    return payload?.userId;
+  } catch (error) {
+    return null;
+  }
+};

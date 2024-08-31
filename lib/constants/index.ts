@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const API_URL = process.env.NEXT_PUBLIC_API_ROUTE;
+export const APP_URL = process.env.NEXT_PUBLIC_API_ROUTE;
 export const TOKEN_SECRET_KEY = process.env.NEXT_PUBLIC_TOKEN_SECRET_KEY;
 export const REFRESH_TOKEN_SECRET_KEY =
   process.env.NEXT_PUBLIC_REFRESH_TOKEN_SECRET_KEY;
@@ -59,10 +59,11 @@ export const signInFormSchema = z.object({
 
 export const ACCESS_TOKEN = "cryptic-byte";
 export const REFRESH_TOKEN = "lumen-code";
-export const TIME_EXPIRE = 60 * 60 * 24 * 7;
+export const MAX_AGE = 60 * 60 * 24 * 7;
 export const USER_INFO = "user-info";
 export const SIGN_IN_SUCCESSFUL = "Signed in successfully";
 export const APP_THEME = "chat-fusion-theme";
+export const USER_ID = "x-user-id";
 
 export const createServerFormSchema = z.object({
   serverName: z

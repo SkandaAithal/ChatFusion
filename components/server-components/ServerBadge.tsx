@@ -13,6 +13,7 @@ const ServerBadge: React.FC<ServerBadgeProps> = ({
   className = "",
   icon,
   serverImage,
+  lazyLoadServerImage = false,
 }) => {
   const { user } = useAuth();
   const userName = user.userName;
@@ -40,6 +41,7 @@ const ServerBadge: React.FC<ServerBadgeProps> = ({
           src={serverImage}
           alt={userName}
           className="rounded-full h-full w-full"
+          isLazyLoad={lazyLoadServerImage}
         />
       ) : (
         <p className="text-2xl">{initials}</p>

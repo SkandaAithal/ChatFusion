@@ -5,7 +5,7 @@ import {
   ACCESS_TOKEN,
   REFRESH_TOKEN,
   REFRESH_TOKEN_SECRET_KEY,
-  TIME_EXPIRE,
+  MAX_AGE,
   TOKEN_SECRET_KEY,
 } from "@/lib/constants";
 
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
   });
 
   // Generate tokens
-  const accessToken = await createJwtToken({ userId: user.uid }, "10s");
+  const accessToken = await createJwtToken({ userId: user.uid }, "1h");
   const refreshToken = await createJwtToken({ userId: user.uid }, "7d");
 
   // Encrypt tokens
@@ -47,14 +47,14 @@ export async function POST(request: NextRequest) {
     httpOnly: true,
     secure: true,
     path: "/",
-    maxAge: TIME_EXPIRE,
+    maxAge: MAX_AGE,
   });
 
   response.cookies.set(REFRESH_TOKEN, encryptedRefreshToken, {
     httpOnly: true,
     secure: true,
     path: "/",
-    maxAge: TIME_EXPIRE,
+    maxAge: MAX_AGE,
   });
 
   if (!userProfile) {

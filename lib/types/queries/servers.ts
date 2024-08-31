@@ -12,3 +12,9 @@ export interface ServerCreationResponse {
   message: string;
   server: Server;
 }
+
+export interface ServersByRole {
+  admin: Server[];
+  moderator: Server[];
+  guest: Server[];
+}

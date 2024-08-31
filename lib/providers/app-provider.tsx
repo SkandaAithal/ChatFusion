@@ -14,7 +14,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [isMobile, setIsMobile] = useState<boolean>(false);
-
+  const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -36,7 +36,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
   }, []);
 
   return (
-    <AppContext.Provider value={{ isMobile, isClient }}>
+    <AppContext.Provider
+      value={{ isMobile, isClient, isAuthLoading, setIsAuthLoading }}
+    >
       {children}
     </AppContext.Provider>
   );

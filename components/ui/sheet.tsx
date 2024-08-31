@@ -129,13 +129,13 @@ SheetDescription.displayName = SheetPrimitive.Description.displayName;
 const SidePanel: React.FC<SidePanelProps> = ({
   panelContent,
   sheetCloseButton,
-  sheetTrigger,
   sheetDescription,
   sheetTitle,
   side,
+  showPanel,
+  isPanelOpen = false,
 }) => (
-  <Sheet modal={false}>
-    <SheetTrigger asChild>{sheetTrigger}</SheetTrigger>
+  <Sheet modal={false} onOpenChange={showPanel} open={isPanelOpen}>
     <SheetContent className="m-0 p-0 w-fit" side={side}>
       <SheetHeader>
         {sheetTitle && <SheetTitle>{sheetTitle}</SheetTitle>}

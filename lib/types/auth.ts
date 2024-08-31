@@ -35,9 +35,6 @@ export interface AuthState {
   uid: string;
 }
 export interface AuthContextType {
-  setIsLoggedin: React.Dispatch<boolean>;
-  setIsAuthLoading: React.Dispatch<boolean>;
-  isLoggedin: boolean;
   user: AuthState;
   dispatch: AuthDispatch;
   isGithubLoading: boolean;
@@ -49,7 +46,6 @@ export interface AuthContextType {
   handleSignUp: (values: SignUpFormData) => void;
   handleGoogleSignIn: () => void;
   handleGitHubSignIn: () => void;
-  isAuthLoading: boolean;
 }
 export type AuthReducerType = (
   state: AuthState,

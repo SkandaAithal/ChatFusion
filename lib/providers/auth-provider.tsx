@@ -5,7 +5,6 @@ import React, {
   useContext,
   useEffect,
   useMemo,
-  useState,
 } from "react";
 import {
   AuthActionTypes,
@@ -20,7 +19,7 @@ import {
   authReducer,
   initailAuthState,
 } from "@/lib/utils/auth";
-import { HOME, LOGIN, USER_AUTH_API } from "@/lib/routes";
+import { HOME, LOGIN, USER_AUTH_API, USER_PROFILE_API } from "@/lib/routes";
 import usePersistentReducer from "@/lib/hooks/use-persistent-reducer";
 import {
   useCreateUserWithEmailAndPassword,
@@ -35,8 +34,10 @@ import {
 } from "@/lib/firebase/config";
 import useToast from "@/lib/hooks/use-toast";
 import usePostMutation from "../hooks/use-post-mutation";
-import { getAPIUrl } from "../utils";
+import { getAPIUrl, isEmpty, queryData } from "../utils";
 import { ToastTypeValues } from "../types/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import { useApp } from "./app-provider";
 const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider: React.FunctionComponent<
   React.PropsWithChildren<unknown>
@@ -45,14 +46,14 @@ export const AuthProvider: React.FunctionComponent<
   const queryparams = useSearchParams();
   const redirectUrl = queryparams.get("redirect");
   const { showToast, showErrorToast } = useToast();
+  const { setIsAuthLoading, isAuthLoading } = useApp();
   const { performPostRequest, isSuccess } = usePostMutation();
-  const [isLoggedin, setIsLoggedin] = useState(false);
-  const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [createUserWithEmailAndPassword, , isSignUpLoading, signUpError] =
     useCreateUserWithEmailAndPassword(auth);
   const [signInWithEmailAndPassword, , isEmailSignInLoading, signInError] =
     useSignInWithEmailAndPassword(auth);
-  const [signInWithGoogle, , isGoogleLoading] = useSignInWithGoogle(auth);
+  const [signInWithGoogle, , isGoogleLoading, googleError] =
+    useSignInWithGoogle(auth);
   const [signInWithGithub, , isGithubLoading, githubError] =
     useSignInWithGithub(auth);
   const [state, dispatch] = usePersistentReducer(
@@ -60,6 +61,11 @@ export const AuthProvider: React.FunctionComponent<
     initailAuthState,
     USER_INFO
   );
+
+  const { data: userProfile } = useQuery({
+    queryKey: ["user-profile"],
+    queryFn: () => queryData(USER_PROFILE_API),
+  });
 
   const isLoading = useMemo(
     () =>
@@ -78,7 +84,21 @@ export const AuthProvider: React.FunctionComponent<
   }, [redirectUrl]);
 
   useEffect(() => {
-    const error = signInError || signUpError || githubError;
+    if (!isEmpty(userProfile?.user)) {
+      const { email, imageUrl, name, userId } = userProfile.user;
+      const payload = {
+        userName: name,
+        userImage: imageUrl,
+        email: email,
+        uid: userId,
+      };
+      dispatch({ type: AuthActionTypes.CREATE_USER, payload });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userProfile]);
+
+  useEffect(() => {
+    const error = signInError || signUpError || githubError || googleError;
 
     if (error?.code) {
       const errorMessage =
@@ -90,6 +110,7 @@ export const AuthProvider: React.FunctionComponent<
 
       showErrorToast(errorMessage as string);
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signInError, signUpError, githubError]);
 
@@ -116,7 +137,6 @@ export const AuthProvider: React.FunctionComponent<
           };
 
           performPostRequest(getAPIUrl(USER_AUTH_API), payload);
-          setIsLoggedin(true);
           dispatch({ type: AuthActionTypes.CREATE_USER, payload });
         }
       } catch (err) {
@@ -173,8 +193,6 @@ export const AuthProvider: React.FunctionComponent<
   return (
     <AuthContext.Provider
       value={{
-        isLoggedin,
-        setIsLoggedin,
         dispatch,
         isGithubLoading,
         isGoogleLoading,
@@ -186,8 +204,6 @@ export const AuthProvider: React.FunctionComponent<
         handleGitHubSignIn,
         handleSignUp,
         user: state,
-        setIsAuthLoading,
-        isAuthLoading,
       }}
     >
       {children}

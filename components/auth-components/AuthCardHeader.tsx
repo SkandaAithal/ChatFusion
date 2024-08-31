@@ -1,12 +1,12 @@
 "use client";
 
-import { useAuth } from "@/lib/providers/auth-provider";
+import { useApp } from "@/lib/providers/app-provider";
 import Image from "next/image";
 import React from "react";
 import { twMerge } from "tailwind-merge";
 
 function AuthCardHeader({ title }: { title: string }) {
-  const { isAuthLoading } = useAuth();
+  const { isAuthLoading } = useApp();
   return (
     <div className="flex justify-center items-center gap-2 py-2">
       <Image
